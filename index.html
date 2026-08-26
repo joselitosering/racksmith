@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>RACKSMITH — Studio Rack</title>
+<link href="https://fonts.googleapis.com/css2?family=Saira+Condensed:wght@500;600;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="rs-core.css">
+</head>
+<body>
+<div id="power">
+  <h1>RACKSMITH</h1>
+  <p>VIRTUAL 19&Prime; STUDIO RACK — MODULAR EDITION<br>HEADPHONES RECOMMENDED</p>
+  <div id="modlist"></div>
+  <button id="pwrbtn"><svg viewBox="0 0 24 24"><path d="M12 3v9"/><path d="M17.2 6.2a7.5 7.5 0 1 1-10.4 0"/></svg><span>POWER ON</span></button>
+</div>
+<div id="topbar">
+  <div id="brand"><b>RACKSMITH</b><span>STUDIO RACK WORKSTATION</span></div>
+  <div class="sp"></div>
+  <button class="tbtn" id="bAdd" disabled>ADD DEVICE</button>
+  <button class="tbtn" id="bDemo" disabled>AUTO-PATCH</button>
+  <button class="tbtn" id="bBank" disabled>PRESETS</button>
+  <button class="tbtn" id="bFlip" disabled>FLIP RACK</button>
+  <button class="tbtn" id="bRevert" disabled>UNPATCH</button>
+  <button class="tbtn" id="bDefault" disabled>DEFAULTS</button>
+  <button class="tbtn" id="bMidi" disabled>MIDI</button>
+  <button class="tbtn" id="bHelp">HELP</button>
+</div>
+<div id="rack"><div id="rackinner"><div id="content"><svg id="cables"></svg></div></div></div>
+<div class="modal" id="midiModal"><div class="mpanel">
+  <h3>MIDI ROUTING <span class="sp"></span><button class="mclose" data-close>&times;</button></h3>
+  <h4>INPUTS</h4><div id="midiIns"><p>No MIDI inputs found.</p></div>
+  <h4>DEVICE CHANNELS</h4><div id="midiChs"></div>
+  <h4>MIDI LEARN</h4>
+  <p>Right-click any knob or fader, then move an encoder (absolute + Arturia relative both work). MiniLab pads play the RD-8, strips = bend/mod, aftertouch = vibrato.</p>
+  <div id="midiBind"></div>
+</div></div>
+<div class="modal" id="bankModal"><div class="mpanel">
+  <h3>PRESET BANK <span class="sp"></span><button class="mclose" data-close>&times;</button></h3>
+  <div class="mrow" style="border-bottom:none"><input id="bankName" placeholder="preset name…" maxlength="24"><button class="tbtn" id="bankSave" style="height:26px">SAVE</button></div>
+  <h4>SAVED PRESETS</h4><div id="bankList"></div>
+</div></div>
+<div class="modal" id="helpModal"><div class="mpanel">
+  <h3>MANUAL <span class="sp"></span><button class="mclose" data-close>&times;</button></h3>
+  <ul>
+  <li>Rack powers up <b>unpatched</b> — every device shows a live <b>VU</b>. <b>AUTO-PATCH</b> wires the demo rig. <b>F</b> flips to the rear; drag cables OUT&rarr;IN; feedback loops are refused.</li>
+  <li><b>HW-1</b>: transport / tempo / feel / position in one line, FX in their own 2&times;2 module grid (GATE · COMP · DELAY · REVERB, POWER + MIX each), master fader + meters, right panel <b>GRAPHIC EQ</b> + <b>VENUE SIM</b>.</li>
+  <li><b>MIX-14</b>: 6 strips — vertical PAN / EQ LO·MID·HI / FX1&ndash;4 sends (post-fader, post-mute), fader, meter, MUTE/SOLO. Four FX buses, 14 pedal types, AMOUNT/MIX/RETURN. Rear: CH1&ndash;6 in + MIX OUT.</li>
+  <li><b>RD-8</b>: 9 voices incl. 808 BASS · DRUM SET 808/909/ACOUSTIC/LO-FI · METER 16/12-triplet/8 · RND · kits · banks A&ndash;H · BARS · COPY/FILL/CLR · swing. <b>MTRX-16</b>: EDM riffs + RND.</li>
+  <li><b>PLAY</b>: SPACE transport · F flip · Z/X octave · A&ndash;P keys play the focused synth (25-key keyboards). Click preset names for lists.</li>
+  <li><b>EXTENDING</b>: add a file calling <code>RS.dev('id',{name,sub,accent,build,back})</code>, include it after rs-devices.js — it appears in ADD DEVICE automatically.</li>
+  </ul>
+</div></div>
+<div id="addmenu"></div>
+<div id="toasts"></div>
+<script>
+/* Bootstrap — power button wired first, independent of all modules */
+window.addEventListener('error',function(e){try{var t=document.createElement('div');t.className='toast';
+t.style.borderLeftColor='#ff6a55';t.textContent='Error: '+e.message;document.getElementById('toasts').appendChild(t);}catch(_){}});
+window.RS={ctx:null,boot:null,mods:{}};
+function rsToast(msg,color){try{var t=document.createElement('div');t.className='toast';
+if(color)t.style.borderLeftColor=color;t.textContent=msg;document.getElementById('toasts').appendChild(t);
+setTimeout(function(){t.style.opacity=0;setTimeout(function(){t.remove();},400);},7000);}catch(_){}}
+document.getElementById('pwrbtn').addEventListener('click',async function(){
+  if(RS.ctx)return;
+  var ctx=null;
+  try{ctx=RS.ctx=new (window.AudioContext||window.webkitAudioContext)();await ctx.resume();}catch(e){ctx=null;}
+  document.getElementById('power').classList.add('off');
+  if(!ctx){rsToast('AudioContext could not start — browser blocked audio','#ff6a55');return;}
+  if(RS.boot&&RS.mods.app&&RS.mods.devices&&RS.mods.ui&&RS.mods.audio){RS.boot(ctx);return;}
+  var have=Object.keys(RS.mods).join(', ')||'none';
+  rsToast('Audio online, but the app did not load. Modules found: '+have+
+    ' — a file is missing or truncated; the folder needs all 7 files.','#ff6a55');
+  try{var o=ctx.createOscillator(),g=ctx.createGain();o.frequency.value=440;
+    g.gain.value=.08;o.connect(g);g.connect(ctx.destination);o.start();o.stop(ctx.currentTime+.3);}catch(_){}
+});
+</script>
+<script src="rs-audio.js"></script>
+<script src="rs-ui.js"></script>
+<script src="rs-midi.js"></script>
+<script src="rs-devices.js"></script>
+<script src="rs-app.js"></script>
+<script>
+/* module checklist on the power screen — names the missing file before you even click */
+(function(){
+  var need=[['audio','AUDIO BRIDGE'],['ui','UI FRAMEWORK'],['midi','MIDI BRIDGE'],['devices','DEVICE REGISTRY'],['app','APPLICATION']];
+  function draw(){
+    var box=document.getElementById('modlist');if(!box)return;
+    box.innerHTML='';
+    need.forEach(function(n){
+      var ok=!!(window.RS&&RS.mods&&RS.mods[n[0]]);
+      var d=document.createElement('div');
+      d.className='moditem'+(ok?' ok':' bad');
+      d.textContent=(ok?'\u25CF ':'\u25CB ')+n[1];
+      box.appendChild(d);});
+  }
+  draw();
+  window.addEventListener('load',draw);
+})();
+</script>
+</body>
+</html>
