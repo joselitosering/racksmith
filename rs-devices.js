@@ -1544,114 +1544,499 @@ back:[
   {title:'EXT IN',jacks:[['extIn','in','audio',null,'EXT · TO FOLDER']]},
   {title:'CV / GATE IN',jacks:[['cvin','in','cv',null,'CV IN'],['gatein','in','cv',null,'GATE IN']]}]});
 
-/* ============ NRD-2 (unchanged) ============ */
-RS.dev('fm',{name:'NRD-2',sub:'FM SYNTH · RED EDITION',accent:'#ff6a55',channel:'omni',
+/* ---- NRD-2 sound bank ---- */
+var PRESETS_NRD=(function(){
+  function P(n,o){
+    var d={sq1:.8,sw1:0,nz1:0,pw1:.5,pwm1:.15,pws1:.3,
+      hpf1:0,hres1:0,lpf1:.7,lres1:.1,fil1:0,fal1:1,fa1:.02,fd1:.35,fr1:.3,flv1:.8,
+      sin1:0,aa1:.02,ad1:.4,as1:.7,ar1:.35,alv1:.8,rvcf1:.5,rvel1:.4,rkey1:.3,raft1:.2,
+      sq2:0,sw2:.7,nz2:0,pw2:.5,pwm2:.3,pws2:.3,
+      hpf2:0,hres2:0,lpf2:.55,lres2:.2,fil2:0,fal2:1,fa2:.06,fd2:.5,fr2:.4,flv2:.8,
+      sin2:.2,aa2:.15,ad2:.5,as2:.6,ar2:.5,alv2:.8,rvcf2:.35,rvel2:.4,rkey2:.3,raft2:.2,
+      coarse:0,fine:0,det2:8,drift:.25,ibend:.5,
+      rmA:.1,rmD:.4,rmDep:0,rmSpd:.35,rmMod:0,
+      lfo1:0,lfo2:1,lspd:.3,lvco:0,lvcf:0,lvca:0,laft:.2,
+      ft1:1,ft2:1,fxr:.18,fxd:.1,fxc:.3,mix:.5,vol:.8,drive:0,
+      rmOn:0,arpOn:0,cmpOn:1};
+    for(var k in o)d[k]=o[k];
+    return {n:n,p:d};}
+  return [
+    P('Blade Runner Brass',{sq1:.9,sw1:.5,pw1:.42,pwm1:.28,pws1:.18,lpf1:.52,lres1:.28,
+      fa1:.05,fd1:.55,fr1:.5,rvcf1:.62,aa1:.08,ad1:.6,as1:.72,ar1:.55,
+      sq2:.6,sw2:.8,pw2:.36,pwm2:.42,lpf2:.46,lres2:.24,fa2:.11,fd2:.6,fr2:.55,rvcf2:.5,
+      sin2:.3,aa2:.16,ad2:.7,as2:.68,ar2:.7,det2:14,drift:.45,
+      lspd:.22,lvco:.05,fxr:.34,fxd:.16,fxc:.42,mix:.5,drive:.22,vol:.8}),
+    P('Juno Poly Strings',{sq1:.55,sw1:.85,pw1:.5,pwm1:.55,pws1:.14,lpf1:.62,lres1:.12,
+      fa1:.22,fd1:.6,fr1:.6,rvcf1:.3,aa1:.3,ad1:.7,as1:.85,ar1:.65,
+      sq2:.5,sw2:.9,pwm2:.62,lpf2:.58,fa2:.3,fd2:.65,fr2:.65,rvcf2:.26,
+      aa2:.38,ad2:.75,as2:.85,ar2:.75,det2:16,drift:.5,
+      lspd:.18,lvco:.04,fxr:.4,fxc:.62,mix:.5,vol:.75}),
+    P('Vangelis Lead',{sq1:.95,sw1:.35,pw1:.3,pwm1:.2,pws1:.1,lpf1:.58,lres1:.42,
+      fa1:.03,fd1:.5,fr1:.45,rvcf1:.7,aa1:.04,ad1:.5,as1:.8,ar1:.5,
+      sq2:.4,sw2:.75,lpf2:.5,lres2:.3,rvcf2:.55,aa2:.06,ad2:.55,as2:.78,ar2:.55,
+      sin2:.35,det2:11,drift:.4,ft2:2,
+      lspd:.26,lvco:.07,fxr:.42,fxd:.26,fxc:.36,mix:.45,drive:.18,vol:.78}),
+    P('Analog Brass Section',{sq1:.8,sw1:.7,pw1:.45,pwm1:.18,lpf1:.5,lres1:.3,
+      fa1:.04,fd1:.45,fr1:.35,rvcf1:.75,rvel1:.6,aa1:.05,ad1:.45,as1:.75,ar1:.35,
+      sq2:.55,sw2:.85,lpf2:.44,lres2:.26,fa2:.07,fd2:.5,rvcf2:.6,
+      aa2:.09,ad2:.5,as2:.72,ar2:.4,det2:10,drift:.35,
+      fxr:.22,fxc:.28,mix:.5,drive:.3,vol:.8}),
+    P('Warm Choir Pad',{sq1:.45,sw1:.6,nz1:.05,pw1:.5,pwm1:.6,pws1:.09,
+      hpf1:.12,lpf1:.5,lres1:.08,fa1:.4,fd1:.7,fr1:.8,rvcf1:.24,
+      aa1:.5,ad1:.8,as1:.9,ar1:.85,sin1:.25,
+      sq2:.4,sw2:.65,pwm2:.7,lpf2:.46,fa2:.5,fd2:.75,fr2:.85,rvcf2:.2,
+      aa2:.6,ad2:.85,as2:.9,ar2:.9,sin2:.3,det2:20,drift:.6,
+      lspd:.12,lvco:.06,fxr:.55,fxc:.7,mix:.5,vol:.72}),
+    P('Dark Sweep Pad',{sq1:.6,sw1:.75,pw1:.38,pwm1:.5,pws1:.06,
+      hpf1:.2,lpf1:.34,lres1:.5,fil1:.05,fa1:.6,fd1:.85,fr1:.9,rvcf1:.85,
+      aa1:.55,ad1:.9,as1:.85,ar1:.9,
+      sq2:.5,sw2:.7,lpf2:.3,lres2:.45,fa2:.7,fd2:.9,fr2:.95,rvcf2:.8,
+      aa2:.65,ad2:.9,as2:.85,ar2:.95,det2:18,drift:.55,ft2:0,
+      lspd:.08,lvcf:.3,fxr:.6,fxd:.3,fxc:.5,mix:.5,vol:.7}),
+    P('Poly Bass',{sq1:.9,sw1:.4,pw1:.34,pwm1:.1,lpf1:.3,lres1:.35,
+      fa1:.02,fd1:.3,fr1:.18,rvcf1:.6,rvel1:.6,aa1:.02,ad1:.35,as1:.5,ar1:.18,
+      sq2:0,sw2:0,sin2:.7,lpf2:.3,aa2:.02,ad2:.35,as2:.6,ar2:.2,
+      ft1:0,ft2:0,det2:4,drift:.2,fxr:.06,fxc:.12,mix:.42,drive:.25,vol:.85}),
+    P('Glass Bell Keys',{sq1:.3,sw1:.2,sin1:.8,lpf1:.85,lres1:.05,
+      fa1:.01,fd1:.4,fr1:.5,rvcf1:.35,aa1:.005,ad1:.5,as1:.15,ar1:.5,
+      sq2:0,sw2:.25,sin2:.6,lpf2:.9,fa2:.01,fd2:.55,rvcf2:.3,
+      aa2:.005,ad2:.6,as2:.1,ar2:.6,det2:24,ft2:3,drift:.3,
+      fxr:.45,fxd:.2,fxc:.4,mix:.5,vol:.75}),
+    P('Resonant Sweep',{sq1:.7,sw1:.8,pw1:.4,pwm1:.35,lpf1:.28,lres1:.78,
+      fil1:.02,fal1:1,fa1:.35,fd1:.7,fr1:.6,rvcf1:.9,
+      aa1:.1,ad1:.6,as1:.8,ar1:.5,
+      sq2:.5,sw2:.7,lpf2:.24,lres2:.72,fa2:.45,fd2:.75,rvcf2:.85,
+      aa2:.15,ad2:.65,as2:.78,ar2:.6,det2:12,drift:.4,
+      lspd:.1,lvcf:.22,fxr:.3,fxd:.24,fxc:.34,mix:.5,drive:.15,vol:.75}),
+    P('Hollow Fifths',{sq1:.85,sw1:0,pw1:.22,pwm1:.08,lpf1:.6,lres1:.18,
+      fa1:.03,fd1:.4,fr1:.35,rvcf1:.45,aa1:.03,ad1:.45,as1:.7,ar1:.35,
+      sq2:.85,sw2:0,pw2:.24,lpf2:.56,rvcf2:.4,aa2:.04,ad2:.45,as2:.7,ar2:.4,
+      ft1:1,ft2:2,det2:6,drift:.3,fxr:.28,fxc:.3,mix:.5,vol:.78}),
+    P('Noise Sweep FX',{sq1:.2,sw1:.2,nz1:.9,hpf1:.3,lpf1:.4,lres1:.6,
+      fil1:0,fal1:1,fa1:.7,fd1:.8,fr1:.7,rvcf1:.95,
+      aa1:.4,ad1:.8,as1:.7,ar1:.8,
+      sq2:0,sw2:.3,nz2:.7,hpf2:.4,lpf2:.35,lres2:.55,fa2:.8,rvcf2:.9,
+      aa2:.5,ad2:.85,as2:.7,ar2:.85,drift:.7,
+      lspd:.06,lvcf:.4,fxr:.65,fxd:.4,fxc:.4,mix:.5,vol:.7}),
+    P('Ring Mod Metal',{sq1:.8,sw1:.5,lpf1:.6,lres1:.3,fa1:.01,fd1:.45,rvcf1:.6,
+      aa1:.005,ad1:.5,as1:.4,ar1:.4,
+      sq2:.6,sw2:.6,lpf2:.55,aa2:.005,ad2:.55,as2:.35,ar2:.45,
+      rmOn:1,rmA:.05,rmD:.5,rmDep:.7,rmSpd:.5,rmMod:.3,det2:9,drift:.35,
+      fxr:.35,fxd:.18,mix:.5,drive:.2,vol:.72}),
+    P('Soft Electric Piano',{sq1:.35,sw1:.25,sin1:.75,lpf1:.72,lres1:.06,
+      fa1:.005,fd1:.45,fr1:.4,rvcf1:.4,rvel1:.7,
+      aa1:.005,ad1:.55,as1:.25,ar1:.4,
+      sq2:0,sw2:.2,sin2:.5,lpf2:.68,aa2:.008,ad2:.6,as2:.2,ar2:.45,
+      det2:7,drift:.25,fxr:.3,fxc:.35,mix:.45,vol:.78}),
+    P('Init Poly',{})
+  ];})();
+
+/* ============ NRD-2 — dual-layer polyphonic synthesizer ============
+   Two complete synth layers stacked per key, each with its own oscillator
+   bank, dual HPF/LPF filter with a five-stage envelope, VCA and response
+   matrix; shared tuning, ring modulator, two LFOs, footage, effects and a
+   layer mixer. Eight-voice polyphony, both layers per voice.
+
+   Pulse width is a real pulse: a sawtooth minus a delayed copy of itself,
+   the delay being width/frequency, so PW and PWM behave the way they do on
+   hardware rather than being a fixed 50% square. */
+RS.dev('fm',{name:'NRD-2',sub:'DUAL-LAYER POLYSYNTH',accent:'#d98fd6',channel:'omni',
 build:function(dev){
   var A=RS.A,UI=RS.UI,ctx=A.ctx;
-  dev.raw=ctx.createGain();dev.raw.gain.value=.8;
-  var saf=A.safeOut();dev.raw.connect(saf.input);dev.out=saf.output;
-  dev.bendG=ctx.createGain();dev.vibG=ctx.createGain();
-  dev.bendG.gain.value=0;dev.vibG.gain.value=0;
-  dev.lfo=ctx.createOscillator();dev.lfo.frequency.value=5.5;dev.lfo.start();
-  dev.lfo.connect(dev.vibG);
+  function G(v){var g=ctx.createGain();g.gain.value=v;return g;}
+  var NV=8;                                   /* voices */
+  var FEET=[16,8,16/3,4,8/3,2];               /* 16' 8' 5 1/3' 4' 2 2/3' 2' */
+  var FEETL=['16&Prime;','8&Prime;','5&#8531;&Prime;','4&Prime;','2&#8532;&Prime;','2&Prime;'];
+  var SHAPES=['sine','sawtooth','triangle','square','random'];
+  /* ---------------- shared back end ---------------- */
+  dev.layerG=[G(.7),G(.7)];                   /* layer bus I / II */
+  dev.sum=G(1);
+  dev.layerG.forEach(function(g){g.connect(dev.sum);});
+  /* ring modulator: layer II ring-modulates layer I, through its own AD env */
+  dev.rmIn=G(0);dev.rmCar=G(1);
+  dev.rmGate=G(0);                            /* the AD envelope */
+  dev.rmOsc=ctx.createOscillator();dev.rmOsc.type='sine';dev.rmOsc.frequency.value=220;dev.rmOsc.start();
+  dev.rmDepthG=G(0);dev.rmOsc.connect(dev.rmDepthG);
+  dev.rmRing=G(0);                            /* carrier x modulator */
+  dev.layerG[0].connect(dev.rmRing);
+  dev.rmDepthG.connect(dev.rmRing.gain);
+  dev.rmRing.connect(dev.rmGate);dev.rmGate.connect(dev.sum);
+  /* drive + effects + output */
+  dev.drivePre=G(1);
+  dev.driveSh=ctx.createWaveShaper();dev.driveSh.curve=A.tanh(2.2);dev.driveSh.oversample='2x';
+  dev.driveDry=G(1);dev.driveWet=G(0);dev.driveSum=G(1);
+  dev.sum.connect(dev.driveDry);dev.driveDry.connect(dev.driveSum);
+  dev.sum.connect(dev.drivePre);dev.drivePre.connect(dev.driveSh);
+  dev.driveSh.connect(dev.driveWet);dev.driveWet.connect(dev.driveSum);
+  dev.fxRev=A.makeFX();dev.fxRev.setType('HALL');dev.fxRev.setAmount(.7);dev.fxRev.setMix(1);
+  dev.fxDly=A.makeFX();dev.fxDly.setType('TAPE ECHO');dev.fxDly.setAmount(.5);dev.fxDly.setMix(1);
+  dev.fxCho=A.makeFX();dev.fxCho.setType('CHORUS');dev.fxCho.setAmount(.6);dev.fxCho.setMix(1);
+  dev.sRev=G(0);dev.sDly=G(0);dev.sCho=G(0);
+  dev.driveSum.connect(dev.sRev);dev.sRev.connect(dev.fxRev.input);
+  dev.driveSum.connect(dev.sDly);dev.sDly.connect(dev.fxDly.input);
+  dev.driveSum.connect(dev.sCho);dev.sCho.connect(dev.fxCho.input);
+  dev.post=G(1);
+  dev.driveSum.connect(dev.post);
+  dev.fxRev.output.connect(dev.post);dev.fxDly.output.connect(dev.post);dev.fxCho.output.connect(dev.post);
+  dev.comp=ctx.createDynamicsCompressor();
+  dev.comp.threshold.value=-20;dev.comp.knee.value=8;dev.comp.ratio.value=3;
+  dev.comp.attack.value=.006;dev.comp.release.value=.16;
+  dev.compMk=G(A.compTrim(-20,3));
+  dev.compDry=G(1);dev.compWet=G(0);dev.compSum=G(1);
+  dev.post.connect(dev.compDry);dev.compDry.connect(dev.compSum);
+  dev.post.connect(dev.comp);dev.comp.connect(dev.compMk);dev.compMk.connect(dev.compWet);
+  dev.compWet.connect(dev.compSum);
+  dev.raw=G(.8);
+  var saf=A.safeOut();dev.compSum.connect(dev.raw);dev.raw.connect(saf.input);dev.out=saf.output;
+  dev.jackNodes.outa=dev.out;dev.outs.add('outa');
+  /* ---------------- two LFOs, shared destinations ---------------- */
+  function mkLfo(){
+    var o=ctx.createOscillator();o.type='sine';o.frequency.value=4;o.start();
+    var oscG=G(1),rndG=G(0),outG=G(1);
+    o.connect(oscG);oscG.connect(outG);
+    var n=A.noiseSrc();
+    var r1=ctx.createBiquadFilter();r1.type='lowpass';r1.frequency.value=4;
+    var r2=ctx.createBiquadFilter();r2.type='lowpass';r2.frequency.value=4;
+    var boost=G(34);
+    n.connect(r1);r1.connect(r2);r2.connect(boost);boost.connect(rndG);rndG.connect(outG);
+    n.start(Math.random());
+    return {osc:o,oscG:oscG,rndG:rndG,out:outG,rnd:[r1,r2]};}
+  dev.lfo1=mkLfo();dev.lfo2=mkLfo();
+  dev.lfoBus=G(1);dev.lfo1.out.connect(dev.lfoBus);dev.lfo2.out.connect(dev.lfoBus);
+  dev.lVco=G(0);dev.lVcf=G(0);dev.lVca=G(0);
+  dev.lfoBus.connect(dev.lVco);dev.lfoBus.connect(dev.lVcf);dev.lfoBus.connect(dev.lVca);
+  dev.bendG=G(0);dev.aftG=G(0);
+  /* ---------------- voices ---------------- */
   dev.voices=new Map();dev.sustained=new Set();dev.pedal=false;
-  var c=UI.el('div','chassis');
-  var hd=UI.el('div','pheader');
-  hd.appendChild(UI.el('div','plate','NRD-2<small>FM · RED EDITION</small>'));
+  dev.held=new Set();dev._dirty=true;dev._ai=0;dev._adir=1;dev._seq=[];dev._arp=false;
+  function P(k,d){var v=dev.p[k];return v===undefined?d:v;}
+  function layerVoice(L,note,vel,t){
+    var s=String(L+1);
+    var foot=FEET[Math.round(P('ft'+s,1))]||8;
+    var base=UI.F2(UI.clamp(note+(P('coarse',0)|0),0,120))*(8/foot);
+    var det=L===1?P('det2',0):0;
+    var f=UI.clamp(base*Math.pow(2,(P('fine',0)+det)/1200),8,12000);
+    var nodes=[],oscs=[],src={};
+    function N(x){nodes.push(x);return x;}
+    function O(x){oscs.push(x);x.start(t);return x;}
+    /* --- pulse: saw minus a delayed saw, delay = width / frequency --- */
+    var mix=N(G(1));
+    var pwLvl=P('sq'+s,0);
+    if(pwLvl>.001){
+      var s1=O(ctx.createOscillator()),s2=O(ctx.createOscillator());
+      s1.type='sawtooth';s2.type='sawtooth';
+      s1.frequency.value=f;s2.frequency.value=f;
+      var dly=N(ctx.createDelay(.05));
+      var w=UI.clamp(P('pw'+s,.5),.02,.5);
+      dly.delayTime.value=w/f;
+      var pwmG=N(G(0));
+      var pwmOsc=O(ctx.createOscillator());
+      pwmOsc.type='triangle';pwmOsc.frequency.value=.05+P('pws'+s,.3)*11;
+      pwmG.gain.value=P('pwm'+s,0)*.45/f;
+      pwmOsc.connect(pwmG);pwmG.connect(dly.delayTime);
+      var inv=N(G(-1)),pg=N(G(pwLvl*.5));
+      src.pulse=pg;src.dly=dly;src.pwm=pwmG;src.pwmOsc=pwmOsc;src.f=f;
+      s1.connect(pg);s2.connect(dly);dly.connect(inv);inv.connect(pg);
+      pg.connect(mix);
+      dev.bendG.connect(s1.detune);dev.bendG.connect(s2.detune);
+      dev.lVco.connect(s1.detune);dev.lVco.connect(s2.detune);}
+    if(P('sw'+s,0)>.001){
+      var sa=O(ctx.createOscillator());sa.type='sawtooth';sa.frequency.value=f;
+      var sg=N(G(P('sw'+s,0)*.5));sa.connect(sg);sg.connect(mix);src.saw=sg;
+      dev.bendG.connect(sa.detune);dev.lVco.connect(sa.detune);}
+    if(P('sin'+s,0)>.001){
+      var si=O(ctx.createOscillator());si.type='sine';si.frequency.value=f;
+      var sig=N(G(P('sin'+s,0)*.6));si.connect(sig);sig.connect(mix);src.sine=sig;
+      dev.bendG.connect(si.detune);dev.lVco.connect(si.detune);}
+    if(P('nz'+s,0)>.001){
+      var nz=A.noiseSrc();oscs.push(nz);nz.start(t,Math.random()*1.5);
+      var ng=N(G(P('nz'+s,0)*.25));nz.connect(ng);ng.connect(mix);src.noise=ng;}
+    /* --- filter: HPF then LPF, each with resonance --- */
+    var hp=N(ctx.createBiquadFilter());hp.type='highpass';
+    hp.frequency.value=UI.clamp(20*Math.pow(400,P('hpf'+s,0)),20,8000);
+    hp.Q.value=.7+P('hres'+s,0)*12;
+    var lp=N(ctx.createBiquadFilter());lp.type='lowpass';
+    var key=P('rkey'+s,0)*(note-60)/12;
+    var cut=UI.clamp(60*Math.pow(260,P('lpf'+s,.8))*Math.pow(2,key),40,17000);
+    lp.frequency.value=cut;
+    lp.Q.value=.7+P('lres'+s,0)*22;
+    var lpTrim=N(G(1/(1+P('lres'+s,0)*.55)));
+    mix.connect(hp);hp.connect(lp);lp.connect(lpTrim);
+    /* filter envelope: IL -> AL over A, decay to IL over D, release over R */
+    var envAmt=P('rvcf'+s,0)*(1+P('rvel'+s,0)*(vel-.5)*2);
+    var fEnv=N(G(0));
+    var fSrc=ctx.createConstantSource();fSrc.offset.value=1;fSrc.start(t);oscs.push(fSrc);
+    fSrc.connect(fEnv);
+    var fAmt=N(G(envAmt*6500));
+    fEnv.connect(fAmt);fAmt.connect(lp.frequency);
+    dev.lVcf.connect(lp.frequency);
+    var IL=P('fil'+s,0),AL=P('fal'+s,1),At=.002+P('fa'+s,0)*3,Dt=.01+P('fd'+s,.3)*4;
+    fEnv.gain.setValueAtTime(IL,t);
+    fEnv.gain.linearRampToValueAtTime(AL,t+At);
+    fEnv.gain.setTargetAtTime(IL,t+At,Math.max(Dt/3,.01));
+    /* --- VCA --- */
+    var outG=N(G(P('flv'+s,.8)));
+    lpTrim.connect(outG);
+    var vca=N(G(0));
+    outG.connect(vca);
+    var peak=UI.clamp(vel,.05,1)*P('alv'+s,.8)*.5;
+    var aA=.002+P('aa'+s,.02)*3,aD=.01+P('ad'+s,.3)*4,aS=P('as'+s,.7),aR=.01+P('ar'+s,.3)*5;
+    vca.gain.setValueAtTime(0,t);
+    vca.gain.linearRampToValueAtTime(peak,t+aA);
+    vca.gain.setTargetAtTime(peak*aS,t+aA,Math.max(aD/3,.01));
+    dev.lVca.connect(vca.gain);
+    dev.aftG.connect(vca.gain);
+    vca.connect(dev.layerG[L]);
+    var part={nodes:nodes,oscs:oscs,vca:vca,fEnv:fEnv,fr:.01+P('fr'+s,.3)*5,ar:aR,IL:IL,
+      L:L,note:note,vel:vel,hp:hp,lp:lp,lpTrim:lpTrim,fAmt:fAmt,outG:outG,src:src};
+    /* re-read the panel and push it at the live nodes, so turning a knob
+       changes notes that are already sounding, the way hardware does */
+    part.apply=function(){
+      var q=String(L+1),now=ctx.currentTime;
+      A.smooth(hp.frequency,UI.clamp(20*Math.pow(400,P('hpf'+q,0)),20,8000));
+      A.smooth(hp.Q,.7+P('hres'+q,0)*12,.03);
+      var kk=P('rkey'+q,0)*(note-60)/12;
+      A.smooth(lp.frequency,UI.clamp(60*Math.pow(260,P('lpf'+q,.8))*Math.pow(2,kk),40,17000));
+      A.smooth(lp.Q,.7+P('lres'+q,0)*22,.03);
+      A.smooth(lpTrim.gain,1/(1+P('lres'+q,0)*.55),.03);
+      A.smooth(fAmt.gain,P('rvcf'+q,0)*(1+P('rvel'+q,0)*(vel-.5)*2)*6500,.03);
+      A.smooth(outG.gain,P('flv'+q,.8));
+      if(src.pulse)A.smooth(src.pulse.gain,P('sq'+q,0)*.5);
+      if(src.saw)A.smooth(src.saw.gain,P('sw'+q,0)*.5);
+      if(src.sine)A.smooth(src.sine.gain,P('sin'+q,0)*.6);
+      if(src.noise)A.smooth(src.noise.gain,P('nz'+q,0)*.25);
+      if(src.dly){
+        A.smooth(src.dly.delayTime,UI.clamp(P('pw'+q,.5),.02,.5)/src.f,.03);
+        A.smooth(src.pwm.gain,P('pwm'+q,0)*.45/src.f,.03);
+        A.smooth(src.pwmOsc.frequency,.05+P('pws'+q,.3)*11,.03);}};
+    dev.live.push(part);
+    return part;}
+  dev.live=[];
+  dev.applyLive=function(){
+    for(var i=0;i<dev.live.length;i++){try{dev.live[i].apply();}catch(e){}}};
+  function mkVoice(note,vel,t){
+    var parts=[];
+    if(P('mix',.5)<.995)parts.push(layerVoice(0,note,vel,t));
+    if(P('mix',.5)>.005)parts.push(layerVoice(1,note,vel,t));
+    return {note:note,parts:parts,
+      off:function(tO){
+        var end=tO;
+        parts.forEach(function(pt){
+          var cur=pt.vca.gain.value;
+          pt.vca.gain.cancelScheduledValues(tO);
+          pt.vca.gain.setValueAtTime(Number.isFinite(cur)?cur:0,tO);
+          pt.vca.gain.setTargetAtTime(0,tO,Math.max(pt.ar/3,.01));
+          var fc=pt.fEnv.gain.value;
+          pt.fEnv.gain.cancelScheduledValues(tO);
+          pt.fEnv.gain.setValueAtTime(Number.isFinite(fc)?fc:0,tO);
+          pt.fEnv.gain.setTargetAtTime(pt.IL,tO,Math.max(pt.fr/3,.01));
+          var e=tO+Math.max(pt.ar*3,.2)+.1;if(e>end)end=e;
+          pt.oscs.forEach(function(o){try{o.stop(e);}catch(err){}});
+          if(pt.oscs[0])pt.oscs[0].onended=function(){
+            pt.nodes.forEach(function(n){try{n.disconnect();}catch(err){}});
+            var ix=dev.live.indexOf(pt);if(ix>=0)dev.live.splice(ix,1);};});
+        return end;}};}
+  /* ---------------- panel ---------------- */
+  /* ---------------- panel ----------------
+     Two blocks, as on a Prophet-style plate: a brushed dark block carrying the
+     signal path (oscillators, filters, envelopes) with its section names set
+     into the bottom rail, and a red block underneath for modulation, tuning,
+     amplifier, voicing and effects. Controls run in signal order. */
+  var c=UI.el('div','chassis pv');
+  var hd=UI.el('div','pheader pvhead');
+  hd.appendChild(UI.el('div','pvbrand','<b>NRD&#8209;2</b><small>DUAL&#8209;LAYER POLYPHONIC SYNTHESIZER</small>'));
   hd.appendChild(UI.el('div','sp'));
-  hd.appendChild(UI.presets(dev,[
-    {n:'INIT SINE',p:{}},
-    {n:'E.PIANO',p:{ratio:1,index:2.6,idxD:.14,fb:.35,spread:6,drive:.1,a:.002,d:1.4,s:0,r:.5,cut:8500,vol:.85}},
-    {n:'BELL',p:{ratio:3.02,index:4.5,idxD:.5,fb:1.2,spread:3,drive:0,a:.002,d:2.4,s:0,r:2.2,cut:12000,vol:.6}},
-    {n:'FM BASS',p:{ratio:.5,index:3.5,idxD:.1,fb:.6,spread:4,drive:.25,a:.003,d:.28,s:.45,r:.12,cut:2600,vol:.85}},
-    {n:'GLASS PAD',p:{ratio:7,index:2,idxD:.9,fb:.8,spread:12,drive:0,a:.01,d:1.8,s:0,r:1.5,cut:14000,vol:.55}},
-    {n:'SUPER PAD',p:{ratio:2,index:2.2,idxD:1.4,fb:.35,spread:18,drive:0,a:.7,d:1.6,s:.75,r:2,cut:7500,vol:.6}},
-    {n:'WARM PAD',p:{ratio:.5,index:1.6,idxD:1.8,fb:.2,spread:14,drive:0,a:.9,d:2,s:.8,r:2.4,cut:4200,vol:.6}},
-    {n:'DRIVE LEAD',p:{ratio:1,index:3.2,idxD:.35,fb:.5,spread:5,drive:.8,a:.004,d:.5,s:.35,r:.2,cut:9000,vol:.65}},
-    {n:'BRITE LEAD',p:{ratio:2,index:4.5,idxD:.2,fb:.7,spread:6,drive:.6,a:.002,d:.4,s:.2,r:.15,cut:12000,vol:.6}},
-    {n:'ORGAN',p:{ratio:2,index:1.4,idxD:2.5,fb:.2,spread:8,drive:.1,a:.012,d:.1,s:1,r:.06,cut:7000,vol:.7}},
-    {n:'CLAV',p:{ratio:1,index:1.6,idxD:.08,fb:.15,spread:5,drive:.3,a:.001,d:.35,s:0,r:.12,cut:4000,vol:.8}},
-    {n:'BRASS',p:{ratio:1,index:1.1,idxD:.4,fb:.1,spread:4,drive:.3,a:.09,d:.3,s:.75,r:.25,cut:4500,vol:.75}}],1));
+  hd.appendChild(UI.presets(dev,PRESETS_NRD,0));
   dev.mchip=UI.el('div','mchip','<i></i>CH OMNI');
   dev.mchip.onclick=function(){RS.openModal('#midiModal');};
-  hd.appendChild(dev.mchip);c.appendChild(hd);
-  c.appendChild(UI.panels(dev,[
-    {title:'OPERATORS',controls:[
-      {t:'k',id:'ratio',label:'RATIO',min:.25,max:8,def:1,fmt:'ratio'},
-      {t:'k',id:'index',label:'INDEX',min:0,max:8,def:2.6,fmt:'one'},
-      {t:'k',id:'idxD',label:'IDX DEC',min:.02,max:2.5,def:.14,log:1,fmt:'ms'},
-      {t:'k',id:'fb',label:'FEEDBK',min:0,max:2.5,def:.35,fmt:'two'}]},
-    {title:'ENV · AMP / TONE',controls:[
-      {t:'k',id:'a',label:'ATT',min:.001,max:2,def:.002,log:1,fmt:'ms'},
-      {t:'k',id:'d',label:'DEC',min:.02,max:3,def:1.4,log:1,fmt:'ms'},
-      {t:'k',id:'s',label:'SUS',min:0,max:1,def:0,fmt:'pc'},
-      {t:'k',id:'r',label:'REL',min:.01,max:3,def:.5,log:1,fmt:'ms'},
-      {t:'k',id:'cut',label:'TONE',min:200,max:16000,def:8500,log:1,fmt:'hz'}]},
-    {title:'VOICE · DRIVE · TRANS',controls:[
-      {t:'k',id:'spread',label:'SPREAD',min:0,max:30,def:6,fmt:'ct'},
-      {t:'k',id:'drive',label:'DRIVE',min:0,max:1,def:.1,fmt:'pc'},
-      {t:'k',id:'vol',label:'VOLUME',min:0,max:1.2,def:.8,fmt:'pc',ap:function(v){dev.raw.gain.setTargetAtTime(v,ctx.currentTime,.02);}},
-      {t:'st',id:'xpose',label:'TRANSPOSE',opts:XP,def:0}]}
-  ]));
-  dev.kbWrap=UI.keys(dev);c.appendChild(dev.kbWrap);dev.chassis=c;
-  dev.jackNodes.outa=dev.out;dev.outs.add('outa');
-  var cvN=ctx.createGain(),gtN=ctx.createGain();
-  dev.jackNodes.cvin=cvN;dev.jackNodes.gatein=gtN;
-  function voice(note,vel,t){
-    var p=dev.p,f=UI.clamp(UI.F2(note),8,12000);
-    var mod=ctx.createOscillator();mod.frequency.value=f*p.ratio;
-    var fbD=ctx.createDelay(.05);
-    var fbSh=ctx.createWaveShaper();fbSh.curve=A.drvCurve;fbSh.oversample='2x';
-    var fbG=ctx.createGain();fbG.gain.value=UI.clamp(p.fb,0,2.5)*f*.2;
-    mod.connect(fbD);fbD.connect(fbSh);fbSh.connect(fbG);fbG.connect(mod.frequency);
-    var mg=ctx.createGain();mg.gain.value=0;mod.connect(mg);
-    var c1=ctx.createOscillator();c1.frequency.value=f;
-    var c2=ctx.createOscillator();c2.frequency.value=f;
-    c1.detune.value=-p.spread;c2.detune.value=p.spread;
-    mg.connect(c1.frequency);mg.connect(c2.frequency);
-    dev.bendG.connect(c1.detune);dev.bendG.connect(c2.detune);
-    dev.vibG.connect(c1.detune);dev.vibG.connect(c2.detune);
-    var g1=ctx.createGain(),g2=ctx.createGain();g1.gain.value=.5;g2.gain.value=.5;
-    var pre=ctx.createGain();pre.gain.value=1+p.drive*3;
-    var drv=ctx.createWaveShaper();drv.curve=A.drvCurve;drv.oversample='2x';
-    var flt=ctx.createBiquadFilter();flt.type='lowpass';flt.frequency.value=UI.clamp(p.cut,100,18000);
-    var vca=ctx.createGain();vca.gain.value=0;
-    c1.connect(g1);c2.connect(g2);g1.connect(pre);g2.connect(pre);
-    pre.connect(drv);drv.connect(flt);flt.connect(vca);vca.connect(dev.out);
-    var amp=A.pEnv(vca.gain,t,0,vel*.5,p.a,p.d,p.s,p.r);
-    var idx=A.pEnv(mg.gain,t,0,p.index*f,.002,p.idxD,.12,p.r);
-    mod.start(t);c1.start(t);c2.start(t);
-    var nodes=[fbD,fbSh,fbG,mg,g1,g2,pre,drv,flt,vca];
-    c1.onended=function(){nodes.forEach(function(n){try{n.disconnect();}catch(e){}});
-      [dev.bendG,dev.vibG].forEach(function(g){try{g.disconnect(c1.detune);g.disconnect(c2.detune);}catch(e){}});};
-    return{off:function(tO){var end=Math.max(amp.off(tO,0),idx.off(tO,0));
-      [mod,c1,c2].forEach(function(o){try{o.stop(end+.02);}catch(e){}});return end;}};}
+  hd.appendChild(dev.mchip);
+  c.appendChild(hd);
+  /* --- spec helpers --- */
+  function K(id,label,def,fmt,min,max,ap){
+    return {t:'k',id:id,label:label,min:min===undefined?0:min,max:max===undefined?1:max,
+            def:def,fmt:fmt||'pc',ap:ap};}
+  function F(id,label,def,fmt,min,max,ap){
+    return {t:'v',id:id,label:label,min:min===undefined?0:min,max:max===undefined?1:max,
+            def:def,fmt:fmt||'pc',ap:ap};}
+  function autoAp(it){if((it.t==='k'||it.t==='v')&&!it.ap)it.ap=function(){dev.applyLive();};return it;}
+  /* a labelled cluster of knobs */
+  function knobs(cap,items){
+    var g=UI.el('div','pvgrp');
+    if(cap)g.appendChild(UI.el('div','pvcap',cap));
+    var b=UI.el('div','pvknobs');
+    items.forEach(function(it){b.appendChild(UI.ctl(dev,autoAp(it)));});
+    g.appendChild(b);return g;}
+  /* a labelled bank of faders sharing one graduation ruler */
+  function faders(cap,items){
+    var g=UI.el('div','pvgrp');
+    if(cap)g.appendChild(UI.el('div','pvcap',cap));
+    var b=UI.el('div','pvfaders');
+    items.forEach(function(it){b.appendChild(UI.ctl(dev,autoAp(it)));});
+    g.appendChild(b);return g;}
+  /* text buttons in the plate style; active option lights red */
+  function chooser(cap,id,opts,def,ap){
+    var g=UI.el('div','pvgrp');
+    if(cap)g.appendChild(UI.el('div','pvcap',cap));
+    var row=UI.el('div','pvbtns');
+    dev.p[id]=def;
+    var bs=[];
+    opts.forEach(function(o){
+      var b=UI.el('button','pvbtn',o.t);
+      b.onclick=function(){dev.P[id].set(o.v);};
+      row.appendChild(b);bs.push(b);});
+    dev.P[id]={set:function(v){dev.p[id]=v;
+      bs.forEach(function(b,i){b.classList.toggle('on',String(opts[i].v)===String(v));});
+      if(ap)try{ap(v);}catch(e){}},_def:def};
+    dev.P[id].set(def);
+    g.appendChild(row);return g;}
+  function led(cap,id,def,ap){
+    var g=UI.el('div','pvgrp pvledg');
+    var b=UI.el('button','pvled');
+    dev.p[id]=def?1:0;
+    dev.P[id]={set:function(v){v=v?1:0;dev.p[id]=v;b.classList.toggle('on',!!v);
+      if(ap)try{ap(v);}catch(e){}},_def:def?1:0};
+    b.onclick=function(){dev.P[id].set(dev.p[id]?0:1);};
+    dev.P[id].set(def?1:0);
+    g.appendChild(b);
+    if(cap)g.appendChild(UI.el('div','pvcap',cap));
+    return g;}
+  function panel(block,cls,title,dark){
+    var p=UI.el('div','pvpanel '+cls);
+    var body=UI.el('div','pvbody');
+    var rail=UI.el('div','pvrail','<i>&#9660;</i>'+title);
+    if(dark){p.append(body,rail);}else{p.append(rail,body);}
+    block.appendChild(p);
+    return {add:function(){for(var i=0;i<arguments.length;i++)body.appendChild(arguments[i]);return this;}};}
+  var FEETO=[{t:'32',v:0},{t:'16',v:1},{t:'8',v:2},{t:'4',v:3},{t:'2',v:4},{t:'1',v:5}];
+  var SHP=[{t:'&#8767;',v:0},{t:'&#9585;',v:1},{t:'&#9651;',v:2},{t:'&#9633;',v:3},{t:'RND',v:4}];
+  /* ================= DARK BLOCK ================= */
+  var dark=UI.el('div','pvblock');
+  var rA=UI.el('div','pvrow');
+  panel(rA,'w-vco','DUAL VCO',1).add(
+    knobs('VCO 1',[K('sq1','Square',.8),K('sw1','Saw',0),K('sin1','Sine',0),K('nz1','Noise',0)]),
+    chooser('FEET 1','ft1',FEETO,1,function(){dev.applyLive();}),
+    knobs('VCO 2',[K('sq2','Square',0),K('sw2','Saw',.7),K('sin2','Sine',.2),K('nz2','Noise',0)]),
+    chooser('FEET 2','ft2',FEETO,1,function(){dev.applyLive();}),
+    faders('PULSE',[F('pw1','PW 1',.5,'pc',.02,.5),F('pwm1','PWM 1',.15),
+                    F('pw2','PW 2',.5,'pc',.02,.5),F('pwm2','PWM 2',.3)]),
+    knobs('PW RATE',[K('pws1','Speed 1',.3),K('pws2','Speed 2',.3)]),
+    knobs('TUNE',[K('coarse','Coarse',0,'semi',-24,24,function(){dev.applyLive();}),
+                  K('fine','Fine',0,'ct',-50,50,function(){dev.applyLive();}),
+                  K('det2','Detune',8,'ct',0,40),
+                  K('mix','Mix',.5,'pc',0,1,function(v){
+                    A.smooth(dev.layerG[0].gain,Math.cos(v*Math.PI/2)*.9);
+                    A.smooth(dev.layerG[1].gain,Math.sin(v*Math.PI/2)*.9);})]));
+  panel(rA,'w-hpf','HPF | PRE',1).add(
+    faders('FREQUENCY',[F('hpf1','I',0),F('hpf2','II',0)]),
+    faders('RES',[F('hres1','I',0),F('hres2','II',0)]));
+  panel(rA,'w-vcf','VCF | MULTIMODE',1).add(
+    faders('CUTOFF',[F('lpf1','I',.7),F('lpf2','II',.55)]),
+    faders('RES',[F('lres1','I',.1),F('lres2','II',.2)]),
+    faders('KYBD',[F('rkey1','I',.3),F('rkey2','II',.3)]),
+    knobs('ENV AMT',[K('rvcf1','VCF 1',.5),K('rvcf2','VCF 2',.35)]),
+    knobs('LFO&#8594;VCF',[K('lvcf','Amount',0,'pc',0,1,function(v){A.smooth(dev.lVcf.gain,v*4200);})]));
+  dark.appendChild(rA);
+  var rB=UI.el('div','pvrow');
+  panel(rB,'w-env','DIGITAL ENV 1  &#183;  LAYER I',1).add(
+    faders('FILTER',[F('fil1','IL',0),F('fal1','AL',1),F('fa1','A',.02),F('fd1','D',.35),F('fr1','R',.3)]),
+    faders('AMPLIFIER',[F('aa1','A',.02),F('ad1','D',.4),F('as1','S',.7),F('ar1','R',.35)]),
+    faders('LEVEL',[F('flv1','VCF',.8),F('alv1','VCA',.8)]),
+    knobs('RESPONSE',[K('rvel1','Vel',.4),K('raft1','Aft',.2)]));
+  panel(rB,'w-env','DIGITAL ENV 2  &#183;  LAYER II',1).add(
+    faders('FILTER',[F('fil2','IL',0),F('fal2','AL',1),F('fa2','A',.06),F('fd2','D',.5),F('fr2','R',.4)]),
+    faders('AMPLIFIER',[F('aa2','A',.15),F('ad2','D',.5),F('as2','S',.6),F('ar2','R',.5)]),
+    faders('LEVEL',[F('flv2','VCF',.8),F('alv2','VCA',.8)]),
+    knobs('RESPONSE',[K('rvel2','Vel',.4),K('raft2','Aft',.2)]));
+  dark.appendChild(rB);
+  c.appendChild(dark);
+  /* ================= RED BLOCK ================= */
+  var red=UI.el('div','pvblock pvred');
+  var rC=UI.el('div','pvrow');
+  panel(rC,'w-lfo','LFO 1  |  VIBRATO').add(
+    chooser('WAVEFORM','lfo1',SHP,0,function(v){setShape(dev.lfo1,v);}),
+    knobs('',[K('lspd','Rate',.3,'hz',.05,24,function(v){
+        A.smooth(dev.lfo1.osc.frequency,v);A.smooth(dev.lfo2.osc.frequency,v*1.37);
+        dev.lfo1.rnd.concat(dev.lfo2.rnd).forEach(function(f){A.smooth(f.frequency,UI.clamp(v,.05,24));});}),
+      K('lvco','Depth',0,'pc',0,1,function(v){A.smooth(dev.lVco.gain,v*70);})]));
+  panel(rC,'w-lfo','LFO 2  |  MOD').add(
+    chooser('WAVEFORM','lfo2',SHP,1,function(v){setShape(dev.lfo2,v);}),
+    knobs('',[K('lvca','&#8594;VCA',0,'pc',0,1,function(v){A.smooth(dev.lVca.gain,v*.35);}),
+              K('laft','&#8594;Aft',.2)]));
+  panel(rC,'w-tune','TUNING  |  VOICE').add(
+    knobs('',[K('drift','Drift',.25),K('ibend','Bend',.5,'two',-1,1)]),
+    chooser('VOICE MODE','arpOn',[{t:'poly',v:0},{t:'arp',v:1}],0,function(v){
+      dev.p.arp=v?'UP':'OFF';dev.held.clear();dev._dirty=true;}));
+  panel(rC,'w-amp','AMPLIFIER  |  OUT').add(
+    knobs('',[K('vol','Volume',.8,'pc',0,1.2,function(v){A.smooth(dev.raw.gain,v);}),
+              K('drive','Drive',0,'pc',0,1,function(v){
+                A.smooth(dev.drivePre.gain,1+v*5,.03);
+                A.smooth(dev.driveWet.gain,v,.03);A.smooth(dev.driveDry.gain,1-v*.8,.03);})]),
+    led('COMP','cmpOn',1,function(v){
+      A.smooth(dev.compWet.gain,v?1:0,.03);A.smooth(dev.compDry.gain,v?0:1,.03);}));
+  red.appendChild(rC);
+  var rD=UI.el('div','pvrow');
+  panel(rD,'w-ring','RING MODULATOR').add(
+    led('ON','rmOn',0,function(v){A.smooth(dev.rmGate.gain,v?1:0,.03);}),
+    knobs('',[K('rmA','Attack',.1),K('rmD','Decay',.4),K('rmDep','Depth',0),
+              K('rmSpd','Speed',.35,'hz',20,2000),K('rmMod','Mod',0)]));
+  panel(rD,'w-fx','EFFECT 1  |  MODULATION').add(
+    knobs('',[K('fxc','Chorus',.3,'pc',0,1,function(v){A.smooth(dev.sCho.gain,v);}),
+              K('fxd','Delay',.1,'pc',0,1,function(v){A.smooth(dev.sDly.gain,v);})]));
+  panel(rD,'w-fx','EFFECT 2  |  SPACE').add(
+    knobs('',[K('fxr','Reverb',.18,'pc',0,1,function(v){A.smooth(dev.sRev.gain,v);})]));
+  red.appendChild(rD);
+  c.appendChild(red);
+  dev.kbWrap=UI.keys(dev);c.appendChild(dev.kbWrap);
+  dev.chassis=c;
+  function setShape(l,i){
+    var rnd=i===4;
+    if(!rnd)l.osc.type=SHAPES[i];
+    A.smooth(l.oscG.gain,rnd?0:1,.03);A.smooth(l.rndG.gain,rnd?1:0,.03);}
+  /* ---------------- note handling ---------------- */
+  dev.p.arp='OFF';dev.p.arpRate=2;dev.p.arpOct=1;dev.p.arpGate=.8;
   dev.noteOn=function(n,vel,when){
     n=Math.round(+n);
     if(!Number.isFinite(n)||n<0||n>120)return;
-    n=UI.clamp(n+(dev.p.xpose||0),0,120);
-    if(vel===undefined)vel=.9;
-    if(!Number.isFinite(vel))vel=.9;
-    vel=UI.clamp(vel,.01,1);
+    if(vel===undefined||!Number.isFinite(vel))vel=.9;
+    vel=UI.clamp(vel,.05,1);
+    if(dev.p.arp!=='OFF'&&!dev._arp){dev.held.add(n);dev._dirty=true;return;}
     var t=Math.max(when||ctx.currentTime,ctx.currentTime);
-    if(!Number.isFinite(t))return;
     var old=dev.voices.get(n);if(old){old.off(t);dev.voices.delete(n);}
-    if(dev.voices.size>=8){var k=dev.voices.keys().next().value;dev.voices.get(k).off(t);dev.voices.delete(k);}
-    dev.voices.set(n,voice(n,vel,t));};
+    if(dev.voices.size>=NV){var k=dev.voices.keys().next().value;
+      dev.voices.get(k).off(t);dev.voices.delete(k);}
+    dev.voices.set(n,mkVoice(n,vel,t));
+    if(dev.p.rmOn)A.smooth(dev.rmGate.gain,1,.02+P('rmA',.1)*.6);};
   dev.noteOff=function(n,when){
-    if(!Number.isFinite(+n))return;
-    n=UI.clamp(Math.round(+n)+(dev.p.xpose||0),0,120);
-    var t=Math.max(when||ctx.currentTime,ctx.currentTime);
-    if(!Number.isFinite(t))return;
+    n=Math.round(+n);
+    if(!Number.isFinite(n))return;
+    if(dev.p.arp!=='OFF'&&!dev._arp){dev.held.delete(n);dev._dirty=true;return;}
     if(dev.pedal){dev.sustained.add(n);return;}
-    var v=dev.voices.get(n);if(v){v.off(t);dev.voices.delete(n);}};
-  dev.allOff=function(){dev.voices.forEach(function(v){v.off(ctx.currentTime);});dev.voices.clear();dev.sustained.clear();};
-  dev.mod=function(v){dev.vibG.gain.setTargetAtTime(Math.abs(v)*25,ctx.currentTime,.02);};
-  dev.bend=function(v){dev.bendG.gain.setTargetAtTime(v*200,ctx.currentTime,.005);};
+    var t=Math.max(when||ctx.currentTime,ctx.currentTime);
+    var v=dev.voices.get(n);if(v){v.off(t);dev.voices.delete(n);}
+    if(!dev.voices.size&&dev.p.rmOn)A.smooth(dev.rmGate.gain,0,.02+P('rmD',.4)*.8);};
+  dev.allOff=function(){var t=ctx.currentTime;
+    dev.voices.forEach(function(v){v.off(t);});dev.voices.clear();
+    dev.sustained.clear();dev.held.clear();dev._dirty=true;
+    A.smooth(dev.rmGate.gain,0,.05);};
+  dev.mod=function(v){A.smooth(dev.lVca.gain,UI.clamp(v,0,1)*.2);};
+  dev.bend=function(v){A.smooth(dev.bendG.gain,v*200,.005);};
+  dev.tick=function(){
+    if(!dev.nameTag||!dev.loadPreset)return;};
+  /* drift + initial bend land on the shared bend bus */
+  (function(){
+    var n=A.noiseSrc();
+    var l1=ctx.createBiquadFilter();l1.type='lowpass';l1.frequency.value=.8;
+    var l2=ctx.createBiquadFilter();l2.type='lowpass';l2.frequency.value=1.3;
+    var g=G(2600),trim=G(0);
+    n.connect(l1);l1.connect(l2);l2.connect(g);g.connect(trim);trim.connect(dev.bendG);
+    n.start(Math.random());
+    dev.driftSrc=ctx.createConstantSource();dev.driftSrc.offset.value=.25;dev.driftSrc.start();
+    dev.driftSrc.connect(trim.gain);})();
+  dev.P.drift={set:function(v){dev.p.drift=UI.clamp(v,0,1);
+    A.smooth(dev.driftSrc.offset,dev.p.drift,.05);},_def:.25};
+  setShape(dev.lfo1,0);setShape(dev.lfo2,1);
 },
-back:[
-  {title:'AUDIO OUT',jacks:[['outa','out','audio',null,'OUT']]},
-  {title:'CV / GATE IN',jacks:[['cvin','in','cv',null,'CV IN'],['gatein','in','cv',null,'GATE IN']]}]});
+back:[{title:'AUDIO OUT',jacks:[['outa','out','audio',null,'OUT']]}]});
 
 /* ============ RD-8 (unchanged) ============ */
 RS.dev('rd',{name:'RD-8',sub:'RHYTHM COMPOSER · 808',accent:'#f2a33c',channel:'omni',

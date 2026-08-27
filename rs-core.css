@@ -318,6 +318,97 @@ canvas.scope{width:100%;height:176px;display:block;background:#05080a;border:1px
 .m-fold .vfill,.m-lfo .vfill{opacity:.85}
 .m-fold .stpb,.m-lfo .stpb{color:#4a463e;background:linear-gradient(#d5d0c3,#bab5a8);border-color:#8d887c}
 .m-fold .stpb.on,.m-lfo .stpb.on{color:#0d3f66;background:linear-gradient(#a9c9e2,#8fb4d4);border-color:#5d86a8}
+.pv{background:linear-gradient(#1a1a1c,#141416);padding:0;gap:0}
+.pvhead{padding:9px 14px;background:linear-gradient(#2c2c2f,#212124);
+  border-bottom:1px solid #0a0a0b}
+.pvbrand b{display:block;font-size:19px;font-weight:700;letter-spacing:.04em;color:#e8e8ea;line-height:1}
+.pvbrand small{display:block;font-size:7px;letter-spacing:.3em;color:#7e7e86;margin-top:2px}
+.pv .plcd{background:#1b1b1d;border-color:#0c0c0d}
+.pv .plcd .pname{color:#e0a24c}
+.pv .mchip{background:#1b1b1d;border-color:#0c0c0d;color:#8a8a92}
+/* ---- blocks and panels ---- */
+.pvblock{display:flex;flex-direction:column;gap:3px;padding:3px}
+.pvrow{display:flex;gap:3px;align-items:stretch}
+.pvpanel{display:flex;flex-direction:column;min-width:0;border:1px solid #08080a;border-radius:2px;
+  background:
+    repeating-linear-gradient(90deg,rgba(255,255,255,.014) 0 1px,transparent 1px 2px),
+    linear-gradient(#3c3c40,#2b2b2e 62%,#232326);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.09),0 1px 2px rgba(0,0,0,.6)}
+.pvbody{display:flex;gap:11px;align-items:flex-start;padding:9px 10px 8px;flex:1;flex-wrap:wrap}
+.pvrail{display:flex;align-items:center;gap:6px;padding:3px 10px 4px;
+  font-size:9px;font-weight:700;letter-spacing:.17em;color:#a9a9b2;
+  border-top:1px solid rgba(0,0,0,.5);box-shadow:0 -1px 0 rgba(255,255,255,.05)}
+.pvrail i{font-style:normal;font-size:7px;color:#70707a}
+/* red block */
+.pvred .pvpanel{border-color:#3d100e;
+  background:
+    repeating-linear-gradient(90deg,rgba(255,255,255,.016) 0 1px,transparent 1px 2px),
+    linear-gradient(#8f2b26,#75211d 62%,#661a17)}
+.pvred .pvrail{color:#f2cfc9;border-top:none;border-bottom:1px solid rgba(0,0,0,.35);
+  box-shadow:0 1px 0 rgba(255,255,255,.07);justify-content:center;letter-spacing:.2em;font-size:9px}
+.pvred .pvrail i{display:none}
+/* ---- panel widths ---- */
+.w-vco{flex:1 1 430px}.w-hpf{flex:0 0 104px}.w-vcf{flex:1 1 250px}
+.w-env{flex:1 1 0}
+.w-lfo{flex:1 1 0}.w-tune{flex:1 1 0}.w-amp{flex:1 1 0}
+.w-ring{flex:1 1 0}.w-fx{flex:1 1 0}
+/* ---- clusters ---- */
+.pvgrp{display:flex;flex-direction:column;gap:4px;min-width:0}
+.pvcap{font-size:6.5px;font-weight:700;letter-spacing:.16em;color:#8e8e97;white-space:nowrap;text-align:center}
+.pvred .pvcap{color:#f0c9c3}
+.pvknobs{display:flex;gap:6px;align-items:flex-start;justify-content:center}
+/* one graduation ruler behind a bank of faders, like the real plate */
+.pvfaders{display:flex;gap:7px;align-items:flex-start;justify-content:center;
+  padding:5px 6px 3px;border-radius:2px;background:rgba(0,0,0,.26);
+  background-image:repeating-linear-gradient(180deg,rgba(255,255,255,.10) 0 1px,transparent 1px 11px);
+  background-position:0 9px}
+.pvred .pvfaders{background:rgba(0,0,0,.2);
+  background-image:repeating-linear-gradient(180deg,rgba(255,255,255,.13) 0 1px,transparent 1px 11px)}
+/* ---- knobs: small, dark, red tick collar ---- */
+.pv .kn{width:40px;gap:2px;position:relative}
+.pv .kn::before{content:"";position:absolute;top:1px;left:50%;width:40px;height:40px;
+  transform:translateX(-50%);border-radius:50%;pointer-events:none;
+  background:repeating-conic-gradient(from 218deg,#c0392b 0 2deg,transparent 2deg 24.5deg);
+  -webkit-mask:radial-gradient(circle,transparent 0 15px,#000 15px 19px,transparent 19px);
+  mask:radial-gradient(circle,transparent 0 15px,#000 15px 19px,transparent 19px)}
+.pvred .kn::before{background:repeating-conic-gradient(from 218deg,#f0d0c8 0 2deg,transparent 2deg 24.5deg)}
+.pv .kn .dial{width:29px;height:29px;border:1px solid #08080a;
+  background:radial-gradient(circle at 38% 26%,#4a4a50,#26262a 58%,#141417);
+  box-shadow:0 2px 4px rgba(0,0,0,.7),inset 0 1px 0 rgba(255,255,255,.16)}
+.pv .kn svg .trk,.pv .kn svg .val{display:none}
+.pv .kn svg .ptr{stroke:#e8a24c;stroke-width:3;stroke-linecap:round}
+.pv .kn .kl{font-size:6.5px;font-weight:600;letter-spacing:.02em;color:#a0a0a8;white-space:nowrap}
+.pv .kn .kv{font-size:6px;color:#75757e}
+.pvred .kn .kl{color:#f3d5cf}.pvred .kn .kv{color:#d9a9a1}
+.pvred .kn .dial{background:radial-gradient(circle at 38% 26%,#3a3a3e,#212124 58%,#111113)}
+/* ---- faders: thin track, orange cap ---- */
+.pv .vsl{width:22px;gap:2px}
+.pv .vtrack{width:4px;height:66px;border-radius:2px;background:#0c0c0e;
+  box-shadow:inset 0 0 0 1px rgba(0,0,0,.7)}
+.pv .vfill{display:none}
+.pv .vcap{left:-7px;width:18px;height:8px;border-radius:2px;border:1px solid #4a2f10;
+  background:linear-gradient(#f0ae55,#d8892f 60%,#b56d20);box-shadow:0 1px 2px rgba(0,0,0,.65)}
+.pv .vcap::after{display:none}
+.pv .vl{font-size:6.5px;font-weight:600;color:#a0a0a8;letter-spacing:.02em;order:2}
+.pv .vv{font-size:6px;color:#75757e;order:3}
+.pv .vtrack{order:1}
+.pvred .vl{color:#f3d5cf}.pvred .vv{color:#d9a9a1}
+/* ---- text buttons + LEDs ---- */
+.pvbtns{display:flex;flex-direction:column;gap:2px;align-items:stretch}
+.pvbtn{height:14px;padding:0 6px;border-radius:2px;font-size:7px;font-weight:600;letter-spacing:.06em;
+  color:#9a9aa2;background:linear-gradient(#2e2e32,#232326);border:1px solid #0a0a0b}
+.pvbtn:hover{color:#d8d8de}
+.pvbtn.on{color:#ffe6df;background:linear-gradient(#d0402f,#a52a1e);border-color:#6d1a12;
+  box-shadow:0 0 5px rgba(208,64,47,.45)}
+.pvred .pvbtn{background:linear-gradient(#5e1a17,#4c1512);border-color:#340d0b;color:#e6b8b1}
+.pvred .pvbtn.on{background:linear-gradient(#f0e6e2,#d8c6c0);color:#5a1a14;border-color:#8a4038}
+.pvledg{align-items:center;justify-content:flex-start}
+.pvled{width:11px;height:11px;border-radius:50%;border:1px solid #0a0a0b;
+  background:radial-gradient(circle at 38% 30%,#3e3e44,#1c1c20);box-shadow:inset 0 1px 1px rgba(255,255,255,.12)}
+.pvled.on{background:radial-gradient(circle at 38% 30%,#ff7a5c,#c0281a);
+  box-shadow:0 0 7px rgba(224,60,40,.75),inset 0 1px 1px rgba(255,255,255,.35)}
+.dev-fm .kb{border-color:#141416}
+.dev-fm .kbwrap{padding:5px 3px 3px;background:#141416}
 /* ---- keyboard ---- */
 .kbwrap{display:flex;gap:10px;align-items:stretch}
 .kb{position:relative;display:flex;height:96px;flex:1;border-radius:0 0 5px 5px;overflow:hidden;background:#191b1f;padding:0;border:1px solid #0c0d10;border-top:none;touch-action:none}
