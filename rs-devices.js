@@ -1910,81 +1910,69 @@ build:function(dev){
   var FEETO=[{t:'32',v:0},{t:'16',v:1},{t:'8',v:2},{t:'4',v:3},{t:'2',v:4},{t:'1',v:5}];
   var SHP=[{t:'&#8767;',v:0},{t:'&#9585;',v:1},{t:'&#9651;',v:2},{t:'&#9633;',v:3},{t:'RND',v:4}];
   /* ================= DARK BLOCK ================= */
-  var dark=UI.el('div','pvblock');
-  var rA=UI.el('div','pvrow');
-  panel(rA,'w-vco','DUAL VCO',1).add(
+  var dark=UI.el('div','pvblock pvgrid');
+  panel(dark,'m-vco','DUAL VCO',1).add(
     knobs('VCO 1',[K('sq1','Square',.8),K('sw1','Saw',0),K('sin1','Sine',0),K('nz1','Noise',0)]),
     chooser('FEET 1','ft1',FEETO,1,function(){dev.applyLive();}),
     knobs('VCO 2',[K('sq2','Square',0),K('sw2','Saw',.7),K('sin2','Sine',.2),K('nz2','Noise',0)]),
     chooser('FEET 2','ft2',FEETO,1,function(){dev.applyLive();}),
-    faders('PULSE',[F('pw1','PW 1',.5,'pc',.02,.5),F('pwm1','PWM 1',.15),
-                    F('pw2','PW 2',.5,'pc',.02,.5),F('pwm2','PWM 2',.3)]),
-    knobs('PW RATE',[K('pws1','Speed 1',.3),K('pws2','Speed 2',.3)]),
-    knobs('TUNE',[K('coarse','Coarse',0,'semi',-24,24,function(){dev.applyLive();}),
-                  K('fine','Fine',0,'ct',-50,50,function(){dev.applyLive();}),
-                  K('det2','Detune',8,'ct',0,40),
-                  K('mix','Mix',.5,'pc',0,1,function(v){
-                    A.smooth(dev.layerG[0].gain,Math.cos(v*Math.PI/2)*.9);
-                    A.smooth(dev.layerG[1].gain,Math.sin(v*Math.PI/2)*.9);})]));
-  panel(rA,'w-hpf','HPF | PRE',1).add(
-    faders('FREQUENCY',[F('hpf1','I',0),F('hpf2','II',0)]),
-    faders('RES',[F('hres1','I',0),F('hres2','II',0)]));
-  panel(rA,'w-vcf','VCF | MULTIMODE',1).add(
-    faders('CUTOFF',[F('lpf1','I',.7),F('lpf2','II',.55)]),
-    faders('RES',[F('lres1','I',.1),F('lres2','II',.2)]),
-    faders('KYBD',[F('rkey1','I',.3),F('rkey2','II',.3)]),
-    knobs('ENV AMT',[K('rvcf1','VCF 1',.5),K('rvcf2','VCF 2',.35)]),
-    knobs('LFO&#8594;VCF',[K('lvcf','Amount',0,'pc',0,1,function(v){A.smooth(dev.lVcf.gain,v*4200);})]));
-  dark.appendChild(rA);
-  var rB=UI.el('div','pvrow');
-  panel(rB,'w-env','DIGITAL ENV 1  &#183;  LAYER I',1).add(
-    faders('FILTER',[F('fil1','IL',0),F('fal1','AL',1),F('fa1','A',.02),F('fd1','D',.35),F('fr1','R',.3)]),
-    faders('AMPLIFIER',[F('aa1','A',.02),F('ad1','D',.4),F('as1','S',.7),F('ar1','R',.35)]),
-    faders('LEVEL',[F('flv1','VCF',.8),F('alv1','VCA',.8)]),
-    knobs('RESPONSE',[K('rvel1','Vel',.4),K('raft1','Aft',.2)]));
-  panel(rB,'w-env','DIGITAL ENV 2  &#183;  LAYER II',1).add(
-    faders('FILTER',[F('fil2','IL',0),F('fal2','AL',1),F('fa2','A',.06),F('fd2','D',.5),F('fr2','R',.4)]),
-    faders('AMPLIFIER',[F('aa2','A',.15),F('ad2','D',.5),F('as2','S',.6),F('ar2','R',.5)]),
-    faders('LEVEL',[F('flv2','VCF',.8),F('alv2','VCA',.8)]),
-    knobs('RESPONSE',[K('rvel2','Vel',.4),K('raft2','Aft',.2)]));
-  dark.appendChild(rB);
+    faders('PULSE WIDTH',[F('pw1','PW I',.5,'pc',.02,.5),F('pwm1','PWM I',.15),
+                          F('pw2','PW II',.5,'pc',.02,.5),F('pwm2','PWM II',.3)]),
+    knobs('PW RATE',[K('pws1','Speed I',.3),K('pws2','Speed II',.3)]));
+  /* one tile per layer: its filter, both envelopes, levels and response, in the
+     order the signal actually travels */
+  function layerTile(L){
+    var q=String(L+1),d1=L?0:1;
+    panel(dark,'m-layer','LAYER '+(L?'II':'I')+'  &#183;  FILTER &#183; ENVELOPES',1).add(
+      faders('FILTER',[F('hpf'+q,'HPF',0),F('hres'+q,'HRES',0),
+                       F('lpf'+q,'CUT',d1?.7:.55),F('lres'+q,'RES',d1?.1:.2),
+                       F('rkey'+q,'KYBD',.3)]),
+      faders('FILTER ENV',[F('fil'+q,'IL',0),F('fal'+q,'AL',1),
+                           F('fa'+q,'A',d1?.02:.06),F('fd'+q,'D',d1?.35:.5),F('fr'+q,'R',d1?.3:.4)]),
+      faders('AMP ENV',[F('aa'+q,'A',d1?.02:.15),F('ad'+q,'D',d1?.4:.5),
+                        F('as'+q,'S',d1?.7:.6),F('ar'+q,'R',d1?.35:.5)]),
+      faders('LEVEL',[F('flv'+q,'VCF',.8),F('alv'+q,'VCA',.8)]),
+      knobs('RESPONSE',[K('rvcf'+q,'Env',d1?.5:.35),K('rvel'+q,'Vel',.4),K('raft'+q,'Aft',.2)]));}
+  layerTile(0);layerTile(1);
   c.appendChild(dark);
   /* ================= RED BLOCK ================= */
-  var red=UI.el('div','pvblock pvred');
-  var rC=UI.el('div','pvrow');
-  panel(rC,'w-lfo','LFO 1  |  VIBRATO').add(
-    chooser('WAVEFORM','lfo1',SHP,0,function(v){setShape(dev.lfo1,v);}),
-    knobs('',[K('lspd','Rate',.3,'hz',.05,24,function(v){
+  var red=UI.el('div','pvblock pvred pvgrid');
+  var rC=red;
+  panel(rC,'m-lfo','LFO 1 VIBRATO  |  LFO 2 MOD').add(
+    chooser('LFO 1','lfo1',SHP,0,function(v){setShape(dev.lfo1,v);}),
+    chooser('LFO 2','lfo2',SHP,1,function(v){setShape(dev.lfo2,v);}),
+    knobs('RATE &#183; DESTINATION',[
+      K('lspd','Rate',.3,'hz',.05,24,function(v){
         A.smooth(dev.lfo1.osc.frequency,v);A.smooth(dev.lfo2.osc.frequency,v*1.37);
         dev.lfo1.rnd.concat(dev.lfo2.rnd).forEach(function(f){A.smooth(f.frequency,UI.clamp(v,.05,24));});}),
-      K('lvco','Depth',0,'pc',0,1,function(v){A.smooth(dev.lVco.gain,v*70);})]));
-  panel(rC,'w-lfo','LFO 2  |  MOD').add(
-    chooser('WAVEFORM','lfo2',SHP,1,function(v){setShape(dev.lfo2,v);}),
-    knobs('',[K('lvca','&#8594;VCA',0,'pc',0,1,function(v){A.smooth(dev.lVca.gain,v*.35);}),
-              K('laft','&#8594;Aft',.2)]));
-  panel(rC,'w-tune','TUNING  |  VOICE').add(
-    knobs('',[K('drift','Drift',.25),K('ibend','Bend',.5,'two',-1,1)]),
-    chooser('VOICE MODE','arpOn',[{t:'poly',v:0},{t:'arp',v:1}],0,function(v){
+      K('lvco','&#8594;VCO',0,'pc',0,1,function(v){A.smooth(dev.lVco.gain,v*70);}),
+      K('lvcf','&#8594;VCF',0,'pc',0,1,function(v){A.smooth(dev.lVcf.gain,v*4200);}),
+      K('lvca','&#8594;VCA',0,'pc',0,1,function(v){A.smooth(dev.lVca.gain,v*.35);}),
+      K('laft','&#8594;Aft',.2)]));
+  panel(rC,'m-tuning','TUNING  |  VOICE').add(
+    knobs('PITCH',[K('coarse','Coarse',0,'semi',-24,24,function(){dev.applyLive();}),
+                   K('fine','Fine',0,'ct',-50,50,function(){dev.applyLive();}),
+                   K('det2','Detune',8,'ct',0,40)]),
+    knobs('LAYER',[K('mix','I &#8646; II',.5,'pc',0,1,function(v){
+                    A.smooth(dev.layerG[0].gain,Math.cos(v*Math.PI/2)*.9);
+                    A.smooth(dev.layerG[1].gain,Math.sin(v*Math.PI/2)*.9);}),
+                   K('drift','Drift',.25),K('ibend','Bend',.5,'two',-1,1)]),
+    chooser('MODE','arpOn',[{t:'poly',v:0},{t:'arp',v:1}],0,function(v){
       dev.p.arp=v?'UP':'OFF';dev.held.clear();dev._dirty=true;}));
-  panel(rC,'w-amp','AMPLIFIER  |  OUT').add(
-    knobs('',[K('vol','Volume',.8,'pc',0,1.2,function(v){A.smooth(dev.raw.gain,v);}),
-              K('drive','Drive',0,'pc',0,1,function(v){
-                A.smooth(dev.drivePre.gain,1+v*5,.03);
-                A.smooth(dev.driveWet.gain,v,.03);A.smooth(dev.driveDry.gain,1-v*.8,.03);})]),
-    led('COMP','cmpOn',1,function(v){
-      A.smooth(dev.compWet.gain,v?1:0,.03);A.smooth(dev.compDry.gain,v?0:1,.03);}));
-  red.appendChild(rC);
-  var rD=UI.el('div','pvrow');
-  panel(rD,'w-ring','RING MODULATOR').add(
+  panel(rC,'m-ring','RING MODULATOR').add(
     led('ON','rmOn',0,function(v){A.smooth(dev.rmGate.gain,v?1:0,.03);}),
     knobs('',[K('rmA','Attack',.1),K('rmD','Decay',.4),K('rmDep','Depth',0),
               K('rmSpd','Speed',.35,'hz',20,2000),K('rmMod','Mod',0)]));
-  panel(rD,'w-fx','EFFECT 1  |  MODULATION').add(
-    knobs('',[K('fxc','Chorus',.3,'pc',0,1,function(v){A.smooth(dev.sCho.gain,v);}),
-              K('fxd','Delay',.1,'pc',0,1,function(v){A.smooth(dev.sDly.gain,v);})]));
-  panel(rD,'w-fx','EFFECT 2  |  SPACE').add(
-    knobs('',[K('fxr','Reverb',.18,'pc',0,1,function(v){A.smooth(dev.sRev.gain,v);})]));
-  red.appendChild(rD);
+  panel(rC,'m-out','EFFECTS  |  OUTPUT').add(
+    knobs('SEND',[K('fxc','Chorus',.3,'pc',0,1,function(v){A.smooth(dev.sCho.gain,v);}),
+                  K('fxd','Delay',.1,'pc',0,1,function(v){A.smooth(dev.sDly.gain,v);}),
+                  K('fxr','Reverb',.18,'pc',0,1,function(v){A.smooth(dev.sRev.gain,v);})]),
+    knobs('MAIN',[K('vol','Volume',.8,'pc',0,1.2,function(v){A.smooth(dev.raw.gain,v);}),
+                  K('drive','Drive',0,'pc',0,1,function(v){
+                    A.smooth(dev.drivePre.gain,1+v*5,.03);
+                    A.smooth(dev.driveWet.gain,v,.03);A.smooth(dev.driveDry.gain,1-v*.8,.03);})]),
+    led('COMP','cmpOn',1,function(v){
+      A.smooth(dev.compWet.gain,v?1:0,.03);A.smooth(dev.compDry.gain,v?0:1,.03);}));
   c.appendChild(red);
   dev.kbWrap=UI.keys(dev);c.appendChild(dev.kbWrap);
   dev.chassis=c;
