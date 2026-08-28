@@ -59,8 +59,10 @@ MIDI.onMIDI=function(e){
       else if(d1===64&&dev.pedal!==undefined){dev.pedal=v>.5;
         if(!dev.pedal){dev.sustained.forEach(function(n){dev.noteOff(n);});dev.sustained.clear();}}
       else if(d1===74&&dev.P.cut)dev.P.cut.set(30*Math.pow(16000/30,v));
-    }else if(cmd===0xD0&&dev.mod){
-      dev.mod(Math.max(0,Math.min(1,d1/127))*.8);
+    }else if(cmd===0xD0){
+      var av=Math.max(0,Math.min(1,d1/127));
+      if(dev.mod)dev.mod(av*.8);
+      if(dev.aftertouch)dev.aftertouch(av);
     }else if(cmd===0xE0&&dev.bend)dev.bend((((d2<<7)|d1)-8192)/8192);});};
 MIDI.panel=function(){
   var ins=RS.UI.$('#midiIns');

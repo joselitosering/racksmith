@@ -41,8 +41,16 @@ svg{display:block}
 .grip{width:18px;height:46px;border-radius:3px;cursor:grab;touch-action:none;background:repeating-linear-gradient(0deg,#101216 0 3px,#282b31 3px 6px)}
 .flipb,.delb{width:24px;height:24px;border-radius:4px;display:flex;align-items:center;justify-content:center;color:#7c828c;background:linear-gradient(#2b2e34,#1d1f24);border:1px solid #0d0e11;font-size:10px;font-weight:700}
 .flipb:hover{color:#e2a34f}.delb:hover{color:#e2574a}
+.collapseb{width:20px;height:20px;flex-shrink:0;border-radius:3px;display:flex;align-items:center;justify-content:center;
+  color:#7c828c;background:linear-gradient(#2b2e34,#1d1f24);border:1px solid #0d0e11;font-size:9px;cursor:pointer}
+.collapseb:hover{color:#e2a34f}
 .chassis{padding:12px 16px 14px;display:flex;flex-direction:column;gap:10px;min-width:0}
 .pheader{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+/* collapsed: the front face shrinks to just its header row (name + status
+   chips + collapse toggle) — every .grp/panel/custom row a device appends
+   after .pheader disappears, regardless of that device's own layout, since
+   this only ever targets ".chassis"'s direct children */
+.dev.collapsed .face.front .chassis>*:not(.pheader){display:none}
 .plate{display:inline-flex;align-items:center;height:24px;padding:0 11px;border-radius:3px;font-weight:700;font-size:14px;letter-spacing:.16em;color:#f2f3f5;box-shadow:inset 0 -2px 4px rgba(0,0,0,.35),inset 0 1px 0 rgba(255,255,255,.18)}
 .plate small{font-weight:600;font-size:10px;letter-spacing:.14em;margin-left:9px;opacity:.72}
 .pheader .sp{flex:1}
@@ -56,6 +64,22 @@ svg{display:block}
 .grp{background:linear-gradient(#26292f,#1e2126);border:1px solid #0f1114;border-top-color:rgba(255,255,255,.05);border-radius:4px;padding:6px 9px 8px;display:flex;flex-direction:column;gap:7px;box-shadow:inset 0 1px 0 rgba(255,255,255,.045)}
 .grp>h5{font-size:9px;font-weight:600;letter-spacing:.16em;color:#7c828c;white-space:nowrap}
 .gwrap{display:flex;gap:9px;align-items:flex-start;flex-wrap:wrap}
+/* STYLE KITS: plain flex-wrap breaks rows unevenly since each kit name is a
+   different width — a real grid keeps every row's columns aligned
+   regardless of label length. auto-fill/minmax lets it use however many
+   columns fit the panel width instead of a fixed count. */
+.kitgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(76px,1fr));gap:6px}
+/* MTRX-16's RIFF PRESETS panel sits in a plain flex-wrap row (not RD-8's
+   dedicated CSS-grid panelRows), so its kitgrid has no ambient width to
+   auto-fill into and collapses to one column — give it a fixed basis */
+.dev-mx .mx-riffgrp{flex:1 1 440px;max-width:620px}
+/* the grid cells were already uniform width, but each button only centered
+   at its own (label-length-dependent) natural width within its cell —
+   stretch the wrapper chain down to the button itself so every button
+   actually fills its column instead of just sharing an aligned column */
+.kitgrid>.stpr{align-items:stretch}
+.kitgrid .stprow{width:100%}
+.kitgrid .stpb{width:100%;min-width:0}
 .widegrp{flex:1 1 380px;min-width:320px}
 .fxgrid{display:grid;grid-template-columns:repeat(2,1fr);grid-auto-rows:1fr;gap:8px}
 .fxmod{background:linear-gradient(#26292f,#1e2126);border:1px solid #0f1114;border-left:3px solid #3f6a4f;border-radius:4px;padding:6px 10px 8px;display:flex;flex-direction:column;gap:6px;box-shadow:inset 0 1px 0 rgba(255,255,255,.045)}
@@ -80,7 +104,30 @@ canvas.vucv{width:100%;height:94px;display:block;border-radius:3px}
 .vgrid{display:grid;grid-template-columns:1fr 1fr;gap:4px}
 .vgrid .stpb{width:100%;min-width:0;height:20px;padding:0 3px;font-size:8px}
 .content-note2{margin-top:2px;padding:7px 10px;border-left:2px solid #6a5a22;border-radius:3px;background:#1a1c20;font-size:10px;line-height:1.5;color:#8b909b}
-.dev-input .plate{color:#a9c4ff}
+/* IN-2: modern digital dark panel with a cool-blue accent instead of the
+   vintage amp skin — close to the rack's own native look on purpose, so the
+   LED spectrum analyzer (below) reads as the focal point. */
+.dev-input .chassis{background:linear-gradient(#232830,#181c22 55%,#12151a);border-radius:4px}
+.dev-input .plate{background:#0e2a4a;color:#bcd9ff}
+/* 11-band LED spectrum analyzer — each band is a stock .meter (proven
+   9-segment green/amber/red ladder) so it's visually consistent with every
+   other meter in the rack; specTick() in rs-devices.js drives the segments
+   from a real analyser tapping the post-chain signal */
+.specpanel{display:flex;justify-content:space-between;align-items:flex-end;gap:6px;
+  background:#05060a;border:1px solid #000;border-radius:4px;padding:12px 10px 8px;
+  box-shadow:inset 0 2px 12px rgba(0,0,0,.85)}
+.specband{display:flex;flex-direction:column;align-items:center;gap:6px;flex:1}
+.specband .meter{width:16px;height:150px}
+.specfreq{font-size:8px;color:#5a5f66;font-family:'Share Tech Mono',monospace;letter-spacing:.03em;white-space:nowrap}
+/* even 3x3 control grid — every widget (knob, toggle, custom) gets an
+   equal-size cell instead of the usual unevenly-sized panel groups */
+.ctlgrid3,.ctlgrid6{display:grid;gap:14px 10px;justify-items:center;align-items:start}
+.ctlgrid3{grid-template-columns:repeat(3,1fr)}
+.ctlgrid6{grid-template-columns:repeat(6,1fr)}
+.ctlgrid3>*,.ctlgrid6>*{width:100%;display:flex;flex-direction:column;align-items:center}
+/* PEAK clip light on the PREAMP console */
+.pled{width:11px;height:11px;border-radius:50%;background:#3a1512;border:1px solid #1a0908;margin-top:4px}
+.pled.on{background:#ff4a3a;box-shadow:0 0 8px rgba(255,74,58,.7)}
 /* ---- RTA display (Qu-style screen) ---- */
 .scopewrap{display:flex;flex-direction:column;gap:6px}
 canvas.scope{width:100%;height:176px;display:block;background:#05080a;border:1px solid #04060a;border-radius:4px;box-shadow:inset 0 2px 14px rgba(0,0,0,.9),0 0 0 1px rgba(120,200,150,.07);cursor:crosshair;touch-action:none}
@@ -176,33 +223,99 @@ canvas.scope{width:100%;height:176px;display:block;background:#05080a;border:1px
 .eqlab{font-family:'Share Tech Mono',monospace;font-size:8px;color:#6f747e}
 /* ---- device tinting / RD-8 / MTRX ---- */
 .dev-rd .chassis{background:linear-gradient(#2e2528,#241c1f 60%,#1e1719);border-radius:4px}
+/* RD-8's control panels (.rd-panels, NOT the plain .rows the pads/step-grid
+   row below also uses): .rows is normally a flex-wrap row, which just wraps
+   by width with no guaranteed column. Force two explicit columns instead so
+   STYLE KITS always lands directly under COMPOSER and the effects block
+   always lands directly under the envelope (TUNE/DECAY/LEVEL/SWING) block,
+   in that DOM order, regardless of width. align-items:stretch (rather than
+   the grid default of each box sitting at its own natural height) makes
+   COMPOSER/STYLE KITS and the envelope/effects pairs fill their shared row
+   height instead of leaving empty space below the shorter box in each row —
+   so every block's height matches, not just its row's. */
+.dev-rd .rd-panels{display:grid;grid-auto-flow:column;grid-template-rows:repeat(2,auto);align-items:stretch}
+/* pads / TRACKS pager / step grid: a 2-column, 2-row grid so the pad grid
+   (row 2, col 1) starts level with the first actual step row (row 2, col 2)
+   instead of with the TRACKS pager above it (row 1, col 2, with nothing in
+   row 1 col 1 to push pads down to match) */
+.dev-rd .rd-main{display:grid;grid-template-columns:auto 1fr;grid-template-rows:auto 1fr;
+  column-gap:20px;row-gap:6px;align-items:start}
+.dev-rd .rd-main>.pads{grid-column:1;grid-row:2;margin-right:0}
+.dev-rd .rd-main>.stpr{grid-column:2;grid-row:1}
+.dev-rd .rd-main>.gridwrap{grid-column:2;grid-row:2}
 .dev-fm .chassis{background:linear-gradient(#47231f,#331714 55%,#2a1210);border-radius:4px}
 .dev-mx .chassis{background:linear-gradient(#1e2a24,#18221d 60%,#141c18)}
 .trks{display:flex;flex-direction:column;gap:4px}
+.gridwrap{display:flex;flex-direction:column;gap:6px;min-width:0;flex:1}
 .steprow{display:flex;gap:4px;align-items:center;flex-wrap:wrap}
+/* the base rule above is flex-wrap:wrap, so once the enlarged pad grid left
+   less than one row's worth of width (529px available vs. ~544px for 16
+   steps), each row wrapped into a near-square block of stacked buttons
+   instead of staying a horizontal strip. nowrap forces one line; trks
+   scrolls horizontally as a fallback so a higher BARS/METER combination
+   overflows gracefully instead of wrapping again. justify-content:flex-end
+   then anchors that one line to the right edge, so a pattern narrower than
+   the available width hugs the far side instead of the pad grid, and
+   content that does overflow keeps its rightmost (most recent) steps in
+   view by default. */
+.dev-rd .trks{overflow-x:auto}
+.dev-rd .steprow{flex-wrap:nowrap;justify-content:flex-end}
 .trlab{width:26px;font-size:9px;font-weight:700;color:#a4886f;font-family:'Share Tech Mono',monospace}
 .stepbtn{width:30px;height:30px;border-radius:4px;display:flex;align-items:center;justify-content:center;background:linear-gradient(#26282e,#191b1f);border:1px solid #0c0d10}
 .stepbtn i{width:18px;height:18px;border-radius:3px;background:#1a1416;box-shadow:inset 0 1px 3px rgba(0,0,0,.8)}
+/* RD-8's step grid enlarged to match the bigger pad grid — was sized for a
+   300px-wide pad column, now scaled up for the 420px one. flex-shrink:0 on
+   both is required: with 16+ buttons at this size no longer fitting the
+   available row width, the default shrink:1 was silently squeezing them
+   back down to ~27px instead of actually overflowing into the trks
+   horizontal scrollbar the way they're meant to. */
+.dev-rd .trlab{width:42px;font-size:11px;flex-shrink:0;text-align:right;padding-right:2px}
+.dev-rd .stepbtn{width:37px;height:37px;border-radius:5px;flex-shrink:0}
+.dev-rd .stepbtn i{width:22px;height:22px}
+.dev-rd .steprow{gap:5px}
+.dev-rd .trks{gap:5px}
 .stepbtn[data-v="1"] i{background:#a8742b}
 .stepbtn[data-v="2"] i{background:#f2a33c;box-shadow:0 0 7px rgba(242,163,60,.45)}
 .stepbtn.now{border-color:#e2a34f;box-shadow:0 0 0 1px #e2a34f}
-.pads{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;min-width:250px}
-.pad{position:relative;height:40px;border-radius:5px;padding:6px 8px 5px 14px;text-align:left;background:linear-gradient(#33363d,#22242a);border:1px solid #0c0d10;box-shadow:inset 0 1px 0 rgba(255,255,255,.08)}
-.pad b{font-size:11px;font-weight:600;color:#c2c6ce;display:block}
-.pad small{font-size:8px;color:#6f747e;letter-spacing:.08em}
-.pad::before{content:"";position:absolute;left:6px;top:8px;bottom:8px;width:3.5px;border-radius:2px;background:#3a2e26}
+.pads{display:grid;grid-template-columns:repeat(4,1fr);gap:9px;width:340px;flex:0 0 340px;margin-right:20px}
+.pad{position:relative;overflow:hidden;aspect-ratio:1;border-radius:6px;padding:9px 10px 7px 18px;text-align:left;background:linear-gradient(#33363d,#22242a);border:1px solid #0c0d10;box-shadow:inset 0 1px 0 rgba(255,255,255,.08)}
+/* velocity flash — screen blend so it lightens the pad instead of covering
+   its label; opacity is set inline per-hit (scaled to velocity) and faded
+   out by JS, not by a CSS animation, so back-to-back hits can each restart
+   the fade from their own brightness instead of racing a fixed-length one */
+.padflash{position:absolute;inset:0;border-radius:inherit;background:#f2a33c;opacity:0;
+  pointer-events:none;mix-blend-mode:screen}
+.pad b{font-size:15px;font-weight:600;color:#c2c6ce;display:block}
+.pad small{font-size:10px;color:#6f747e;letter-spacing:.08em}
+.pad::before{content:"";position:absolute;left:8px;top:10px;bottom:10px;width:4.5px;border-radius:2px;background:#3a2e26}
 .pad.sel{border-color:#8c6a38}
 .pad.sel::before{background:#f2a33c;box-shadow:0 0 6px rgba(242,163,60,.6)}
+/* per-pad mute — a small corner button, independent of pad selection so
+   clicking it (stopPropagation'd) never also selects/previews that pad */
+.padmute{position:absolute;top:6px;right:6px;width:18px;height:18px;border-radius:4px;
+  font-size:9px;font-weight:700;line-height:18px;text-align:center;padding:0;
+  color:#6f747e;background:linear-gradient(#2e3036,#22242a);border:1px solid #0c0d10}
+.padmute:hover{color:#c2c6ce}
+.padmute.on{color:#fff;background:linear-gradient(#c0392b,#8c2519);border-color:#5a170f;
+  box-shadow:0 0 6px rgba(192,57,43,.6)}
+.pad.muted{opacity:.55}
+.pad.muted b,.pad.muted small{color:#7a7d83}
 .mgrid{display:flex;gap:6px}
-.mlabels{display:flex;flex-direction:column-reverse;width:14px}
+.mlabels{display:flex;flex-direction:column-reverse;width:14px;flex-shrink:0}
 .mlabels b{height:9px;font-size:7px;font-weight:600;color:#5d6a63;display:flex;align-items:center}
-.mcols{display:flex;gap:2px}
-.mcol{display:flex;flex-direction:column-reverse;gap:1px;width:36px}
+/* no horizontal scrolling: .mcols always spans the full remaining window
+   width and each .mcol is an equal flex:1 slice of it, so raising BARS
+   re-divides the same width into more/narrower steps instead of growing
+   past it */
+.mcols{display:flex;gap:2px;flex:1;min-width:0}
+.mcol{display:flex;flex-direction:column-reverse;gap:1px;flex:1;min-width:0}
 .cell{height:8px;border-radius:1.5px;background:#161d19;cursor:pointer}
 .cell:hover{outline:1px solid #3d5248}
 .cell.on{background:#5fc9b8}
 .cell.now,.mcol.now{outline:1px solid rgba(226,163,79,.85)}
-.mcol .vc{height:20px;border-radius:2px;background:#141a16;position:relative;cursor:ns-resize;touch-action:none;overflow:hidden;margin-top:2px}
+/* 71px matches the note grid's own content height (8 cells × 8px + 7 gaps
+   × 1px) so the VELOCITY window reads as tall as the NOTE window above it */
+.mcol .vc{height:71px;border-radius:2px;background:#141a16;position:relative;cursor:ns-resize;touch-action:none;overflow:hidden;margin-top:2px}
 .mcol .vc i{position:absolute;left:2px;right:2px;bottom:2px;background:#3f8a7c}
 /* ---- modular: vintage rack modules, System-500 layout language ---- */
 .modrow{display:flex;gap:5px;align-items:stretch;flex-wrap:nowrap;overflow-x:auto;padding-bottom:2px}
@@ -334,21 +447,34 @@ canvas.scope{width:100%;height:176px;display:block;background:#05080a;border:1px
 .pvgrid{display:grid;grid-template-columns:repeat(12,1fr);gap:2px;
   align-items:stretch;grid-auto-flow:row dense}
 .pvgrid .pvpanel{min-width:0}
-/* two rows only: oscillators run the full height on the left, one complete
-   layer per row on the right */
-.m-vco   {grid-column:span 5;grid-row:span 2}
+/* two rows, paired left/right: VCO above VCO B on the left, LAYER I above
+   LAYER II on the right — every tile is one row tall now. VCO/VCO B pin an
+   explicit row each so dense packing can't slide them next to each other
+   and strand the layer tiles a row short of the columns they need. */
+.m-vco   {grid-column:span 5;grid-row:1}
+.m-vcob  {grid-column:span 5;grid-row:2}
 .m-layer {grid-column:span 7}
-/* red bed: four equal tiles, one row */
-.m-lfo   {grid-column:span 3}
-.m-tuning{grid-column:span 3}
-.m-ring  {grid-column:span 3}
-.m-out   {grid-column:span 3}
+/* red bed runs its own finer 24-column grid (still the same total width) —
+   12ths were too coarse to size these tiles precisely. Five groups in a
+   row: LFO/VOICE stack, ARPEGGIATOR running full height, GLIDE running full
+   height right next to it, RING/EFFECTS stack, then OUTPUT running full
+   height at the far end. Explicit column lines (not span+auto) so the
+   groups land in order regardless of how dense packing would otherwise
+   resolve the row-spanning tiles. */
+.pvred.pvgrid{grid-template-columns:repeat(24,1fr)}
+.m-lfo   {grid-column:1/8;grid-row:1}
+.m-tuning{grid-column:1/8;grid-row:2}
+.m-arp   {grid-column:8/12;grid-row:span 2}
+.m-glide {grid-column:12/16;grid-row:span 2}
+.m-ring  {grid-column:16/21;grid-row:1}
+.m-fx    {grid-column:16/21;grid-row:2}
+.m-out   {grid-column:21/25;grid-row:span 2}
 .pvpanel{display:flex;flex-direction:column;min-width:0;border:1px solid #08080a;border-radius:2px;
   background:
     repeating-linear-gradient(90deg,rgba(255,255,255,.014) 0 1px,transparent 1px 2px),
     linear-gradient(#3c3c40,#2b2b2e 62%,#232326);
   box-shadow:inset 0 1px 0 rgba(255,255,255,.09),0 1px 2px rgba(0,0,0,.6)}
-.pvbody{display:flex;gap:7px;align-items:flex-start;align-content:flex-start;padding:6px 7px 6px;flex:1;flex-wrap:wrap}
+.pvbody{display:flex;gap:7px;align-items:flex-start;align-content:flex-start;padding:6px 7px 6px;flex:1;flex-wrap:wrap;position:relative}
 .pvrail{display:flex;align-items:center;gap:6px;padding:2px 8px 3px;
   font-size:9px;font-weight:700;letter-spacing:.17em;color:#a9a9b2;
   border-top:1px solid rgba(0,0,0,.5);box-shadow:0 -1px 0 rgba(255,255,255,.05)}
@@ -371,6 +497,47 @@ canvas.scope{width:100%;height:176px;display:block;background:#05080a;border:1px
 .pvcap{font-size:6.5px;font-weight:700;letter-spacing:.16em;color:#8e8e97;white-space:nowrap;text-align:center}
 .pvred .pvcap{color:#f0c9c3}
 .pvknobs{display:flex;gap:3px;align-items:flex-start;justify-content:center;flex-wrap:wrap}
+/* stack a knobs() cluster in a column instead of a row (e.g. a 2x1 pair) */
+.pvknobs.vert{flex-direction:column;align-items:center}
+/* red-tile template: toggles get their own row above, knob clusters share one
+   aligned row below. Reserve the same corner width a light() occupies (see
+   .pvbody>.pvledg) so a centered toggle row never runs under it. */
+.pvtogglerow{display:flex;gap:10px;align-items:flex-start;justify-content:center;flex-wrap:wrap;width:100%;min-height:26px}
+.pvtogglerow.gutter{padding-right:24px}
+/* extra breathing room above a row, e.g. to set POWER apart from the option
+   row directly under it */
+.pvtogglerow.gap{margin-top:8px}
+.pvknobrow{display:flex;gap:10px;align-items:flex-start;justify-content:center;flex-wrap:wrap;width:100%}
+.pvknobrow.left{justify-content:flex-start}
+/* mirrors .pvtogglerow.gutter so a knob row centers within the same
+   effective width as a gutter'd toggle row above it */
+.pvknobrow.gutter{padding-right:24px}
+/* a light() is added as its own top-level child of the tile (a sibling of
+   the toggle/knob rows, not nested in either) and pinned to the tile's own
+   upper-right corner, out of flow so it never competes with row centering */
+.pvbody>.pvledg{position:absolute;top:2px;right:5px;margin-left:0}
+/* a vertical stack used to build side-by-side columns inside a tile — pair
+   one with .right to push it to the tile's far right edge */
+.pvcol{display:flex;flex-direction:column;gap:7px}
+.pvcol.right{margin-left:auto}
+/* VCO B's PULSE WIDTH/PW RATE only have half the knobs DUAL VCO's do, so
+   the same margin-left:auto right-flush lands them at a different x — a
+   narrower box hugging the same right edge has a further-right left edge.
+   Pin this column to DUAL VCO's right-column width so each pvgrp inside it
+   (cap included — .pvgrp's default align-items is stretch) stretches to
+   that same 149px too. Align the LABEL first: with both caps centered
+   over an identical width, "PULSE WIDTH"/"PW RATE" land at the same x in
+   both tiles; the knobs then just center under that same width like they
+   already do everywhere else, so fewer knobs still center on the label
+   instead of drifting to whichever edge the column's real content hugs. */
+.m-vcob .pvcol.right{width:149px}
+/* same idea for the left column: Assign's 2 knobs are narrower than
+   WAVEFORM's 4, so match WAVEFORM's width and let the default stretch
+   center both the cap and the knobs within it */
+.vcob-assign{width:149px}
+/* same trick for a single knobs()/flip() cluster sitting loose in a tile's
+   body (not inside a .pvcol) — pushes just that cluster to the right edge */
+.pvgrp.right{margin-left:auto}
 /* one graduation ruler behind a bank of faders, like the real plate */
 .pvfaders{display:flex;gap:4px;align-items:flex-start;justify-content:center;
   padding:4px 4px 3px;border-radius:2px;background:rgba(0,0,0,.26);
@@ -378,6 +545,42 @@ canvas.scope{width:100%;height:176px;display:block;background:#05080a;border:1px
   background-position:0 9px}
 .pvred .pvfaders{background:rgba(0,0,0,.2);
   background-image:repeating-linear-gradient(180deg,rgba(255,255,255,.13) 0 1px,transparent 1px 11px)}
+/* LAYER I/II: the fader clusters (not the RESPONSE knobs beside them) grow
+   to fill the tile's full height instead of sitting at their fixed natural
+   size — the tile itself is already stretched by CSS Grid to match DUAL
+   VCO/VCO B's row, so without this the faders left a band of dead space
+   under them. align-self on .pvfadgrp only opts faders into this; RESPONSE
+   isn't a .pvfadgrp so it keeps its natural size and just gets pushed right
+   by .pvgrp.right above. */
+/* with flex-wrap:wrap (the default, needed on every other tile), a flex
+   line here doesn't actually stretch to the container's full cross size
+   even when everything fits on one visual row — nowrap is what makes
+   align-self:stretch below reach the tile's true height; already confirmed
+   nothing here needs to wrap, so this is safe */
+.m-layer .pvbody{flex-wrap:nowrap}
+.m-layer .pvfadgrp{align-self:stretch}
+.m-layer .pvfaders{flex:1;align-items:stretch}
+/* the actual slider (.vsl, from the 'v' control type — NOT the unrelated
+   .fad/.ftrack faders used elsewhere) needs its OWN track to grow too;
+   without this the background card above got taller but the handle stayed
+   pinned to its old fixed-height track, floating with dead space above it.
+   Only .vtrack grows — .vl/.vv keep their natural (unflexed) size — and a
+   bit wider per the same request, up from the shared 4px default. */
+.m-layer .vsl{flex:1}
+.m-layer .vtrack{flex:1;height:auto;min-height:60px}
+/* .pv .vtrack / .pv .vcap (further down, same specificity) set width/left
+   too — being later in the file they'd win a tie, so these need the extra
+   .pv ancestor to actually take precedence */
+.pv .m-layer .vtrack{width:7px}
+.pv .m-layer .vcap{left:-4.5px}
+/* GLIDE and OUTPUT share one layout: POWER pinned at the top (GLIDE's is
+   level with ARPEGGIATOR's own POWER row — see the JS comment on that
+   panel), knobs centered in the space below rather than hugging the row
+   right above them. Column direction keeps POWER's natural top position
+   while letting the knob row grow to fill the rest of the tile and center
+   within that space. */
+.m-glide .pvbody,.m-out .pvbody{flex-direction:column}
+.m-glide .pvknobrow,.m-out .pvknobrow{flex:1;align-items:center}
 /* ---- knobs: small, dark, red tick collar ---- */
 .pv .kn{width:35px;gap:1px;position:relative}
 .pv .kn::before{content:"";position:absolute;top:0;left:50%;width:35px;height:35px;
@@ -409,6 +612,9 @@ canvas.scope{width:100%;height:176px;display:block;background:#05080a;border:1px
 .pvred .vl{color:#f3d5cf}.pvred .vv{color:#d9a9a1}
 /* ---- text buttons + LEDs ---- */
 .pvbtns{display:flex;flex-direction:row;flex-wrap:wrap;gap:2px;align-items:center;justify-content:center;max-width:118px}
+/* forces exactly two per row regardless of container width, instead of
+   however many happen to fit before flex-wrap breaks the line */
+.pvbtns.grid2{display:grid;grid-template-columns:repeat(2,1fr);justify-items:stretch;max-width:80px}
 .pvbtn{height:13px;min-width:16px;padding:0 4px;border-radius:2px;font-size:7px;font-weight:600;letter-spacing:.04em;
   color:#9a9aa2;background:linear-gradient(#2e2e32,#232326);border:1px solid #0a0a0b}
 .pvbtn:hover{color:#d8d8de}

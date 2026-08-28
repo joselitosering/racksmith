@@ -46,6 +46,11 @@ A.init=function(ctx){
   A.lim.threshold.value=-2;A.lim.knee.value=4;A.lim.ratio.value=14;A.lim.attack.value=.002;A.lim.release.value=.14;
   A.limMk=G(A.compTrim(-2,14));
   A.clip=ctx.createWaveShaper();A.clip.curve=tanh(1.3);A.clip.oversample='2x';
+  /* surge guard: the limiter+clip pair already bounds any single peak, but a
+     runaway feedback patch can sit the output at that ceiling continuously —
+     that's a surge, not a peak, so it needs its own watchdog (see raf() in
+     rs-app.js) which ducks this stage rather than one-shot clipping it */
+  A.surge=G(1);A.surgeActive=false;
   A.gain=G(.92);A.split=ctx.createChannelSplitter(2);A.anaL=ANA();A.anaR=ANA();
   A.in.connect(A.gateAna);
   A.in.connect(A.gateDry);A.gateDry.connect(A.gSum);
@@ -62,7 +67,7 @@ A.init=function(ctx){
   A.dR.connect(A.dTone);A.dTone.connect(A.dFb);A.dFb.connect(A.dL);
   A.dWet.connect(A.sum);
   A.eqOut.connect(A.rIn);A.rIn.connect(A.rHP);A.rHP.connect(A.conv);A.conv.connect(A.rTone);A.rTone.connect(A.rWet);A.rWet.connect(A.sum);
-  A.sum.connect(A.lim);A.lim.connect(A.limMk);A.limMk.connect(A.clip);A.clip.connect(A.gain);
+  A.sum.connect(A.lim);A.lim.connect(A.limMk);A.limMk.connect(A.clip);A.clip.connect(A.surge);A.surge.connect(A.gain);
   A.gain.connect(A.split);A.split.connect(A.anaL,0);A.split.connect(A.anaR,1);
   A.gain.connect(ctx.destination);
   A.mkIR(2.2);
@@ -159,7 +164,7 @@ A.heal=function(){
     A.lim=ctx.createDynamicsCompressor();
     A.lim.threshold.value=-2;A.lim.knee.value=4;A.lim.ratio.value=14;A.lim.attack.value=.002;A.lim.release.value=.14;
     A.clip=ctx.createWaveShaper();A.clip.curve=tanh(1.3);A.clip.oversample='2x';
-    A.sum.connect(A.lim);A.lim.connect(A.limMk);A.limMk.connect(A.clip);A.clip.connect(A.gain);
+    A.sum.connect(A.lim);A.lim.connect(A.limMk);A.limMk.connect(A.clip);A.clip.connect(A.surge);
   }catch(e){}
   setTimeout(function(){
     if(!A.ctx)return;
@@ -169,6 +174,26 @@ A.heal=function(){
     if(RS.S&&RS.S.hw)A.applyMFX(RS.S.hw.p);
   },2300);
   RS.UI.toast('Signal fault — master FX flushed, restoring in 2s',3200);};
+var surgeT=null;
+/* SURGE GUARD — called by the watchdog in rs-app.js's raf() when the master
+   output has sat at the limiter's ceiling for a sustained stretch (a
+   feedback loop riding the limiter, not just one loud hit). Ducks hard and
+   fast, then eases back over a couple seconds so it doesn't thump. */
+A.duckSurge=function(){
+  if(!A.ctx)return;
+  var t=A.ctx.currentTime;
+  A.surgeActive=true;
+  if(A.onSurge)try{A.onSurge(true);}catch(e){}
+  A.surge.gain.cancelScheduledValues(t);
+  A.surge.gain.setTargetAtTime(.2,t,.015);
+  clearTimeout(surgeT);
+  surgeT=setTimeout(function(){
+    if(!A.ctx)return;
+    A.surgeActive=false;
+    if(A.onSurge)try{A.onSurge(false);}catch(e){}
+    A.surge.gain.setTargetAtTime(1,A.ctx.currentTime,.6);
+  },2000);
+  RS.UI.toast('Surge guard — output ducked, easing back in',2600);};
 A.pEnv=function(param,t,from,to,At,D,Sf,R){
   if(!Number.isFinite(t))t=A.ctx.currentTime;
   if(!Number.isFinite(from))from=0;

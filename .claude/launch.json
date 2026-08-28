@@ -1,6 +1,6 @@
 {
   "version": "0.0.1",
   "configurations": [
-    { "name": "racksmith", "runtimeExecutable": "python", "runtimeArgs": [".claude/devserver.py", "8802"], "port": 8802 }
+    { "name": "racksmith", "runtimeExecutable": "python", "runtimeArgs": [".claude/devserver.py"], "autoPort": true }
   ]
 }

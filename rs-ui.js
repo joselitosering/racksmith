@@ -203,13 +203,25 @@ UI.gr=function(){var m=UI.el('div','grm'),sg=[],i;
   return{el:m,set:function(gr){if(!Number.isFinite(gr))gr=0;
     var c=UI.clamp(Math.round(-gr/1.5),0,8);if(c===last)return;last=c;
     sg.forEach(function(s,i){s.classList.toggle('on',i<c);});}};};
-/* 25-key keyboard: C..C over two octaves */
-UI.keys=function(dev){
+/* keyboard: C..C spanning `octaves` octaves (default 2). White/black key
+   offsets are generated per octave so any span reuses the same C-major
+   pattern instead of a hand-written table. */
+UI.keys=function(dev,octaves){
+  octaves=octaves||2;
   var wrap=UI.el('div','kbwrap'),kb=UI.el('div','kb');
-  var WOFF=[0,2,4,5,7,9,11,12,14,16,17,19,21,23,24];
-  var BM={1:0,3:1,6:3,8:4,10:5,13:7,15:8,18:10,20:11,22:12};
+  var WPAT=[0,2,4,5,7,9,11],BPAT=[[0,1],[1,3],[3,6],[4,8],[5,10]];
+  var WOFF=[],BM={};
+  for(var o=0;o<octaves;o++){
+    WPAT.forEach(function(w){WOFF.push(12*o+w);});
+    BPAT.forEach(function(p){BM[12*o+p[1]]=o*7+p[0];});
+  }
+  WOFF.push(12*octaves);
   function build(){kb.innerHTML='';
-    var base=48+12*RS.S.kbOct;
+    /* base picked so middle C (60) lands at the exact midpoint of the
+       keyboard's span (12*octaves semitones) rather than 1/4 of the way in,
+       at kbOct's own default (1) — each +/- still shifts a full octave
+       from there, same as before */
+    var base=60-6*octaves+12*(RS.S.kbOct-1);
     WOFF.forEach(function(s){var k=UI.el('div','wk');k.dataset.n=base+s;kb.appendChild(k);});
     /* a black key straddles the seam between two whites: 62% of a white key
        wide, centred on the seam. The old code used one figure for both the
@@ -232,6 +244,19 @@ UI.keys=function(dev){
       if(spring){wm._v=0;if(dev.bend)dev.bend(0);hd.style.top='calc(50% - 4px)';}});
     return wm;}
   var bend=mkWheel('BEND',true),mod=mkWheel('MOD',false);
+  /* transpose shifts the whole rack's keyboard octave, same as the Z/X
+     shortcut — every device's kbWrap rebuilds together, so this stays in sync
+     with any other keyboard on the rack */
+  var octWrap=UI.el('div','stpr');octWrap.style.justifyContent='center';
+  octWrap.appendChild(UI.el('div','kl2','OCT'));
+  var octRow=UI.el('div','stprow');
+  var octDn=UI.el('button','stpb','&#8722;'),octUp=UI.el('button','stpb','+');
+  function shiftOct(d){
+    RS.S.kbOct=UI.clamp(RS.S.kbOct+d,-2,2);
+    RS.S.devices.forEach(function(dv){if(dv.kbWrap)dv.kbWrap.rebuild();});
+    UI.toast('Keyboard octave: '+RS.S.kbOct);}
+  octDn.onclick=function(){shiftOct(-1);};octUp.onclick=function(){shiftOct(1);};
+  octRow.append(octDn,octUp);octWrap.appendChild(octRow);
   function press(k,cy){if(!k)return;
     var r=k.getBoundingClientRect(),vel=UI.clamp(.5+((cy-r.top)/r.height)*.5,.35,1),n=Number(k.dataset.n);
     if(kb._n!=null&&kb._n!==n){var old=kb.querySelector('[data-n="'+kb._n+'"]');if(old)old.classList.remove('on');dev.noteOff(kb._n);}
@@ -244,7 +269,7 @@ UI.keys=function(dev){
   function lift(){if(kb._held){kb._held.classList.remove('on');kb._held=null;}
     if(kb._n!=null){dev.noteOff(kb._n);kb._n=null;}}
   kb.addEventListener('pointerup',lift);kb.addEventListener('pointercancel',lift);
-  build();wrap.append(bend,mod,kb);wrap.rebuild=build;return wrap;};
+  build();wrap.append(octWrap,bend,mod,kb);wrap.rebuild=build;return wrap;};
 UI.presets=function(dev,presets,start){
   if(start===undefined)start=0;
   var w=UI.el('div','plcd'),nm=UI.el('span','pname');
@@ -305,9 +330,14 @@ function jackPos(devId,jack){var d=RS.byId(devId),j=d&&d.jackEls[jack];if(!j)ret
   var r=j.getBoundingClientRect(),c=UI.$('#content').getBoundingClientRect();
   return{x:r.left+r.width/2-c.left,y:r.top+r.height/2-c.top};}
 var CABLE_COL={audio:'#e2a34f',cv:'#5fc9b8',mod:'#8ab4ff'};
-/* a jack is reachable only while the face carrying it is showing */
+/* a jack is reachable only while the face carrying it is showing — and a
+   collapsed device hides its front face entirely, so a front-mounted jack
+   (SGE-7's modular matrix) goes unreachable too, same as if it were on the
+   flipped-away face */
 UI.jackVisible=function(dev,jack){
-  return (dev.jackFace&&dev.jackFace[jack]==='front')?!dev.flipped:!!dev.flipped;};
+  var onFront=dev.jackFace&&dev.jackFace[jack]==='front';
+  if(onFront&&dev.collapsed)return false;
+  return onFront?!dev.flipped:!!dev.flipped;};
 UI.drawCables=function(){
   var svg=UI.$('#cables'),c=UI.$('#content');if(!svg)return;
   var W=c.offsetWidth,H=c.offsetHeight;
@@ -422,6 +452,24 @@ UI.mount=function(type){
     var w=UI.el('div','dev dev-'+type+(dev.flipped?' flipped':''));w.dataset.id=dev.id;
     var fr=UI.el('div','face front');
     fr.append(mkEar('l',{grip:1,flip:1}),dev.chassis,mkEar('r',{del:1}));
+    /* collapse: shrinks the front face down to just its header row (name +
+       status chips) — every device gets this for free since it's wired up
+       here in the shared mount path, not per-device. Only the FRONT face
+       collapses; the back stays fully reachable so cabling into a
+       collapsed device's jacks still works. A device that patches through
+       front-mounted jacks (SGE-7's modular matrix) needs those hidden from
+       cable drawing too while collapsed — UI.jackVisible below handles that. */
+    var ph=dev.chassis.querySelector('.pheader');
+    if(ph){
+      var collapseBtn=UI.el('button','collapseb','&#9660;');
+      collapseBtn.title='Collapse';
+      collapseBtn.onclick=function(){
+        dev.collapsed=!dev.collapsed;
+        w.classList.toggle('collapsed',dev.collapsed);
+        collapseBtn.innerHTML=dev.collapsed?'&#9654;':'&#9660;';
+        collapseBtn.title=dev.collapsed?'Expand':'Collapse';
+        UI.drawCables();};
+      ph.insertBefore(collapseBtn,ph.firstChild);}
     var bk=UI.el('div','face back'),bp=UI.el('div','backpanel');
     bp.appendChild(UI.el('div','bkhead','<div class="bkbrand"><b>'+spec.name+'</b><small>'+spec.sub+'</small></div>'));
     var jrow=UI.el('div','bkjacks');

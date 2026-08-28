@@ -21,6 +21,7 @@
   <button class="tbtn" id="bBank" disabled>PRESETS</button>
   <button class="tbtn" id="bFlip" disabled>FLIP RACK</button>
   <button class="tbtn" id="bRevert" disabled>UNPATCH</button>
+  <button class="tbtn" id="bUndo" disabled>UNDO</button>
   <button class="tbtn" id="bDefault" disabled>DEFAULTS</button>
   <button class="tbtn" id="bMidi" disabled>MIDI</button>
   <button class="tbtn" id="bHelp">HELP</button>
@@ -44,8 +45,8 @@
   <ul>
   <li>Rack powers up <b>unpatched</b> — every device shows a live <b>VU</b>. <b>AUTO-PATCH</b> wires the demo rig. <b>F</b> flips to the rear; drag cables OUT&rarr;IN; feedback loops are refused.</li>
   <li><b>HW-1</b>: transport / tempo / feel / position in one line, FX in their own 2&times;2 module grid (GATE · COMP · DELAY · REVERB, POWER + MIX each), master fader + meters, right panel <b>GRAPHIC EQ</b> + <b>VENUE SIM</b>.</li>
-  <li><b>MIX-14</b>: 6 strips — vertical PAN / EQ LO·MID·HI / FX1&ndash;4 sends (post-fader, post-mute), fader, meter, MUTE/SOLO. Four FX buses, 14 pedal types, AMOUNT/MIX/RETURN. Rear: CH1&ndash;6 in + MIX OUT.</li>
-  <li><b>RD-8</b>: 9 voices incl. 808 BASS · DRUM SET 808/909/ACOUSTIC/LO-FI · METER 16/12-triplet/8 · RND · kits · banks A&ndash;H · BARS · COPY/FILL/CLR · swing. <b>MTRX-16</b>: EDM riffs + RND.</li>
+  <li><b>TRK-8</b>: 8 strips laid out just like HW-1's own — GAIN/HPF/HI/MID/LO / PAN/AUX1&ndash;4 (post-fader), MUTE/PFL, fader + stereo meters — plus a MASTER LR strip (GAIN/HPF/EQ/PAN, MAIN fader) summing all 8. Four FX buses, 14 pedal types, AMOUNT/MIX/RETURN. Rear: CH1&ndash;8 in, CHAIN IN (sums straight into the mix bus — cascade another mixer's master out here without spending a numbered channel) + MASTER BUS out.</li>
+  <li><b>RD-8</b>: 9 voices incl. 808 BASS · DRUM SET 808/909/ACOUSTIC/LO-FI · METER 16/12-triplet/8 · RND · kits · banks A&ndash;H · BARS · COPY/FILL/CLR · swing. Rear: shared OUT plus a dry, pre-FX DIRECT OUT per instrument. <b>MTRX-16</b>: EDM riffs + RND.</li>
   <li><b>PLAY</b>: SPACE transport · F flip · Z/X octave · A&ndash;P keys play the focused synth (25-key keyboards). Click preset names for lists.</li>
   <li><b>EXTENDING</b>: add a file calling <code>RS.dev('id',{name,sub,accent,build,back})</code>, include it after rs-devices.js — it appears in ADD DEVICE automatically.</li>
   </ul>

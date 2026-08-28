@@ -4,8 +4,20 @@ window.RS=window.RS||{};RS.mods=RS.mods||{};RS.mods.app='ok';
 (function(){
 var UI=RS.UI,A=RS.A;
 RS.S={ctx:null,powered:false,devices:[],cables:[],playing:false,bpm:124,swing:14,
- tick:0,nextT:0,timer:null,uiQ:[],midiIns:[],focus:null,kbOct:1,hw:null,flipped:false,ccBindings:{}};
+ tick:0,nextT:0,timer:null,uiQ:[],midiIns:[],focus:null,kbOct:1,hw:null,flipped:false,ccBindings:{},undo:[]};
 RS.byId=function(id){return RS.S.devices.find(function(d){return d.id===id;});};
+/* one shared undo history for every device's destructive pattern actions
+   (COPY/FILL/RND/CLR/kit-or-riff loads) — a single top-bar UNDO steps back
+   through whichever device did the most recent one, up to 10 deep. Each
+   device calls RS.pushUndo(restoreFn) with a closure that already carries
+   its own snapshot; this module doesn't need to know each device's shape. */
+RS.pushUndo=function(restoreFn){
+  RS.S.undo.push(restoreFn);
+  if(RS.S.undo.length>10)RS.S.undo.shift();};
+RS.undo=function(){
+  if(!RS.S.undo.length){UI.toast('Nothing to undo');return;}
+  var fn=RS.S.undo.pop();
+  try{fn();}catch(e){UI.toast('Undo error: '+e.message);}};
 var warned=new Set();
 RS.warn=function(dev){if(warned.has(dev.id))return;
   if(dev.outs.size&&!RS.S.cables.some(function(c){return c.from.dev===dev.id&&c.kind==='audio';})){
@@ -65,8 +77,8 @@ function sched(){
       while(d._nt<ct+.15&&g2++<24){
         var pos=d._st%(d.p.bars*res);
         var t=d._nt+((pos%2===1)?(d.p.rswing||0)/100*dur:0);
-        for(var i=0;i<9;i++){var v=d.getStep(pos,i);
-          if(v)d.hit(i,t,v===2?1:.72);}
+        for(var i=0;i<d.drum.length;i++){var v=d.getStep(pos,i);
+          if(v&&!(d.muted&&d.muted[i]))d.hit(i,t,v===2?1:.72);}
         (function(p2){RS.S.uiQ.push({t:d._nt,fn:function(){d.setNow(p2);}});})(pos);
         d._st++;d._nt+=dur;}
     }catch(e){}});
@@ -96,9 +108,18 @@ function step16(k,t0){
               setTimeout(function(){try{x.noteOff(note);}catch(e){}},Math.max(0,(t0+sd*.92-RS.S.ctx.currentTime)*1000));});}
         }
       }
+      /* fm (NRD-2) runs its own arp clock off dev.tick now, independent of
+         the transport — see rs-devices.js — so it's excluded here to avoid
+         double-firing whenever the rack happens to be playing */
       if(d.type==='sub'&&d.p.arp!=='OFF'&&d.held&&d.held.size){
         var rate=d.p.arpRate||2;
-        if(k%rate===0){
+        /* a phase accumulator rather than k%rate, so non-integer rates
+           (triplet 1/3, quintuplet 1/5, sub-tick 1/32) land on time too —
+           plain modulo only ever hits exactly on integer divisors */
+        if(d._arpPh===undefined)d._arpPh=0;
+        d._arpPh+=1;
+        if(d._arpPh>=rate-1e-9){
+          d._arpPh-=rate;
           var hs=Array.from(d.held).sort(function(a,b){return a-b;});
           if(d._dirty||d._seq.length!==hs.length*(d.p.arpOct||1)){
             d._seq=[];
@@ -128,7 +149,7 @@ function step16(k,t0){
   });
   if(RS.S.hw)RS.S.uiQ.push({t:t0,fn:function(){RS.S.hw.lcd();}});}
 /* ---- render loop (devices own their per-frame visuals via tick) ---- */
-var nanStreak=0,healAt=-10;
+var nanStreak=0,healAt=-10,hotStreak=0,surgeAt=-10;
 function raf(){
   requestAnimationFrame(raf);
   if(!(RS.S.ctx&&RS.S.powered))return;
@@ -144,6 +165,13 @@ function raf(){
     if(bad){nanStreak++;
       if(nanStreak>=30&&now-healAt>3){healAt=now;nanStreak=0;A.heal();}}
     else nanStreak=0;
+    /* surge guard: a finite but continuously-at-the-ceiling signal (feedback
+       riding the limiter) won't ever look "bad" above — it needs its own,
+       slower-to-trip watchdog so one loud transient doesn't false-trigger it */
+    var hot=Math.max(A.dbOf(A.anaL),A.dbOf(A.anaR))>-.5;
+    if(hot){hotStreak++;
+      if(hotStreak>=90&&!A.surgeActive&&now-surgeAt>2.5){surgeAt=now;hotStreak=0;A.duckSurge();}}
+    else hotStreak=Math.max(0,hotStreak-2);
   }catch(e){}
   RS.S.devices.forEach(function(d){
     try{if(d.tick)d.tick();}catch(e){}
@@ -174,7 +202,10 @@ window.addEventListener('keydown',function(e){
   if(!RS.S.powered)return;
   if(e.code==='KeyF'){UI.$('#bFlip').click();return;}
   if(e.code==='KeyZ'||e.code==='KeyX'){
-    RS.S.kbOct=UI.clamp(RS.S.kbOct+(e.code==='KeyZ'?-1:1),0,4);
+    /* base=48+12*kbOct feeds a 4-octave (48-semitone) keybed, so kbOct must
+       stay within [-2,2] to keep base+48 <=120 and base>=0 — -2 reaches down
+       to C1 for bass patches without the top keys landing on dead notes */
+    RS.S.kbOct=UI.clamp(RS.S.kbOct+(e.code==='KeyZ'?-1:1),-2,2);
     RS.S.devices.forEach(function(d){if(d.kbWrap)d.kbWrap.rebuild();});
     UI.toast('Keyboard octave: '+RS.S.kbOct);return;}
   if(KEYMAP[e.code]===undefined)return;
@@ -272,6 +303,7 @@ UI.$('#bRevert').onclick=function(){
   RS.rebuild();UI.drawCables();
   UI.toast('Reverted — '+n+' cable'+(n===1?'':'s')+' pulled. Every module is back on its '+
     'normals and the rack is unpatched; AUTO-PATCH rewires the rig.',5000);};
+UI.$('#bUndo').onclick=function(){RS.undo();};
 UI.$('#bBank').onclick=function(){renderBank();RS.openModal('#bankModal');};
 UI.$('#bankSave').onclick=function(){
   var nm=(UI.$('#bankName').value||'').trim();
@@ -316,7 +348,7 @@ function buildDefaultRack(){
 RS.boot=function(ctx){
   RS.S.ctx=ctx;
   RS.S.powered=true;
-  ['bAdd','bDemo','bBank','bFlip','bMidi','bRevert','bDefault'].forEach(function(id){UI.$('#'+id).disabled=false;});
+  ['bAdd','bDemo','bBank','bFlip','bMidi','bRevert','bUndo','bDefault'].forEach(function(id){UI.$('#'+id).disabled=false;});
   try{A.init(ctx);}catch(e){UI.toast('Audio init failed: '+e.message,8000);return;}
   try{buildAddMenu();}catch(e){UI.toast('Menu build: '+e.message);}
   try{buildDefaultRack();}catch(e){UI.toast('Rack build: '+e.message,8000);}
