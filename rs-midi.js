@@ -22,6 +22,7 @@ function flash(dev){if(!dev.mchip)return;
 var monLog=[];
 function decodeMIDI(data){
   var st=data[0]||0,d1=data[1]||0,d2=data[2]||0,cmd=st&0xf0,ch=(st&0x0f)+1;
+  if(st===0xf0)return 'SysEx    '+data.length+' bytes';
   if(cmd===0x90&&d2>0)return 'Note On  ch'+ch+'  note '+d1+'  vel '+d2;
   if(cmd===0x80||(cmd===0x90&&d2===0))return 'Note Off ch'+ch+'  note '+d1;
   if(cmd===0xB0)return 'CC       ch'+ch+'  #'+d1+' = '+d2;
@@ -128,7 +129,14 @@ MIDI.panel=function(){
     r.appendChild(x);bsec.appendChild(r);});};
 MIDI.init=function(){
   if(!navigator.requestMIDIAccess){MIDI.panel();return;}
-  navigator.requestMIDIAccess({sysex:false}).then(function(acc){
+  /* sysex:true, not false — some controllers (Arturia's DAW-mode pad/knob
+     protocol included) wrap their own messages in System Exclusive, and the
+     spec allows a browser to silently strip SysEx from delivery when the
+     page didn't ask for it. A port that shows up in the list but never
+     produces a single message in the MONITOR panel is exactly what that
+     looks like from here — asking for sysex costs one extra permission
+     prompt and can only unblock messages, never lose any. */
+  navigator.requestMIDIAccess({sysex:true}).then(function(acc){
     var bind=function(){RS.S.midiIns=Array.from(acc.inputs.values()).map(function(i){
       i.onmidimessage=MIDI.onMIDI;return{id:i.id,name:i.name,on:true};});
       MIDI.panel();};
