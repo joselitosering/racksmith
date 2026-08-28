@@ -30,6 +30,8 @@
 <div class="modal" id="midiModal"><div class="mpanel">
   <h3>MIDI ROUTING <span class="sp"></span><button class="mclose" data-close>&times;</button></h3>
   <h4>INPUTS</h4><div id="midiIns"><p>No MIDI inputs found.</p></div>
+  <h4>MONITOR <small style="font-weight:400;opacity:.7">— raw messages as they arrive, before any routing. Nothing appearing while you play/turn something means the browser isn't receiving MIDI at all (OS/driver/permission), not an app bug.</small></h4>
+  <div id="midiMon" class="midimon"><p>Nothing received yet.</p></div>
   <h4>DEVICE CHANNELS</h4><div id="midiChs"></div>
   <h4>MIDI LEARN</h4>
   <p>Right-click any knob or fader, then move an encoder (absolute + Arturia relative both work). MiniLab pads play the RD-8, strips = bend/mod, aftertouch = vibrato.</p>

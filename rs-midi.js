@@ -13,6 +13,29 @@ MIDI.clearLearn=function(){if(learnState){learnState.el.classList.remove('learni
 function flash(dev){if(!dev.mchip)return;
   dev.mchip.classList.add('lit');clearTimeout(dev._ft);
   dev._ft=setTimeout(function(){dev.mchip.classList.remove('lit');},110);}
+/* MONITOR — logs every raw message the browser hands us, before ANY of the
+   early-returns below (disabled input, ctx not ready, channel mismatch...)
+   can drop it. This is the one place that answers "is the browser even
+   receiving MIDI from the hardware" independent of whatever the app does
+   with it afterward — the single most useful fact when troubleshooting a
+   controller that "does nothing". */
+var monLog=[];
+function decodeMIDI(data){
+  var st=data[0]||0,d1=data[1]||0,d2=data[2]||0,cmd=st&0xf0,ch=(st&0x0f)+1;
+  if(cmd===0x90&&d2>0)return 'Note On  ch'+ch+'  note '+d1+'  vel '+d2;
+  if(cmd===0x80||(cmd===0x90&&d2===0))return 'Note Off ch'+ch+'  note '+d1;
+  if(cmd===0xB0)return 'CC       ch'+ch+'  #'+d1+' = '+d2;
+  if(cmd===0xE0)return 'Bend     ch'+ch+'  '+(((d2<<7)|d1)-8192);
+  if(cmd===0xD0)return 'Aftertouch ch'+ch+'  '+d1;
+  if(cmd===0xC0)return 'Program  ch'+ch+'  '+d1;
+  return 'Unknown  0x'+st.toString(16);}
+function pushMonitor(name,data){
+  monLog.unshift({name:name,txt:decodeMIDI(data),raw:Array.prototype.join.call(data,' ')});
+  if(monLog.length>10)monLog.length=10;
+  var el=RS.UI&&RS.UI.$('#midiMon');if(!el)return;
+  el.innerHTML=monLog.map(function(m){
+    return '<div class="mrow"><label><b style="font-family:\'Share Tech Mono\',monospace">'+m.txt+
+      '</b> &middot; '+m.name+' &middot; [ '+m.raw+' ]</label></div>';}).join('');}
 function applyBinding(cc,d2){
   var b=RS.S.ccBindings[cc];if(!b)return false;
   var bd=RS.byId(b.dev);
@@ -33,6 +56,7 @@ function applyBinding(cc,d2){
   return true;}
 MIDI.onMIDI=function(e){
   var inp=RS.S.midiIns.find(function(i){return i.id===e.target.id;});
+  try{pushMonitor((inp&&inp.name)||(e.target&&e.target.name)||'?',e.data);}catch(err){}
   if(inp&&!inp.on)return;
   if(!RS.A.ctx)return;
   var st=e.data[0],d1=e.data[1]||0,d2=e.data[2]||0;
