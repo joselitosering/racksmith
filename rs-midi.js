@@ -45,9 +45,21 @@ MIDI.onMIDI=function(e){
     RS.UI.toast('Learned: CC '+d1+' \u2192 '+ls.dev.name+' '+(ls.label||''));
     return;}
   if(cmd===0xB0&&applyBinding(d1,d2))return;
+  var midiCh=(st&0x0f)+1;
   RS.S.devices.forEach(function(dev){
     if(dev.channel===undefined||dev.channel==='off')return;
-    if(dev.channel!=='omni'&&dev.channel!==((st&0x0f)+1))return;
+    if(dev.channel!=='omni'&&dev.channel!==midiCh)return;
+    /* RD-8 always answers a channel/omni match on whatever notes its dmap
+       recognizes — a drum machine doesn't need "focus" for its pads to work,
+       same as a real one. Every OTHER omni device (synths) would otherwise
+       all sound at once for the same key, since 'omni' is the default state
+       for every synth in the rack — so once something has focus (clicking a
+       device sets RS.S.focus, same as the computer-keyboard shortcut uses),
+       an omni synth only responds if it's the focused one. A device given
+       its own explicit channel (not omni) still always answers on that
+       channel regardless of focus — that's a deliberate multi-timbral
+       assignment, not the automatic default. */
+    if(dev.type!=='rd'&&dev.channel==='omni'&&RS.S.focus&&RS.S.focus!==dev)return;
     if(cmd===0x90&&d2>0){flash(dev);
       if(dev.type==='rd'){var tr=dev.dmap[d1];if(tr!==undefined)dev.hit(tr,RS.A.ctx.currentTime,d2/127);}
       else if(dev.noteOn)dev.noteOn(d1,d2/127);
@@ -98,7 +110,8 @@ MIDI.init=function(){
       MIDI.panel();};
     acc.onstatechange=bind;bind();
     var ml=RS.S.midiIns.find(function(i){return /minilab/i.test(i.name||'');});
-    if(ml)RS.UI.toast('Arturia MiniLab detected — pads play the RD-8, right-click any knob to MIDI-learn an encoder',4200);
+    if(ml)RS.UI.toast('Arturia MiniLab detected — pads always play the RD-8. Keys play whichever synth is focused '+
+      '(click its panel to focus it). Right-click any knob or fader to MIDI-learn an encoder.',6000);
     else if(RS.S.midiIns.length)RS.UI.toast(RS.S.midiIns.length+' MIDI input(s) detected');
   }).catch(function(){MIDI.panel();RS.UI.toast('MIDI access denied');});};
 return MIDI;})();
