@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>RACKSMITH</title>
+<style>
+  html,body{margin:0;padding:0;height:100%;background:#0b0c0f;overflow:hidden}
+  iframe{display:block;width:100%;height:100%;border:0}
+</style>
+</head>
+<body>
+<!-- microphone: IN-2's live input; midi: MIDI Learn / controller routing —
+     both need to be explicitly allowed through to the embedded app, or the
+     browser's permissions policy silently blocks them inside the iframe -->
+<iframe src="racksmith.html" title="RACKSMITH — Studio Rack" allow="microphone; midi"></iframe>
+</body>
+</html>
