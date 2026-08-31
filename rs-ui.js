@@ -327,7 +327,12 @@ UI.panels=function(dev,rows){
 var UIDI=1;
 var dragCable=null;
 function jackPos(devId,jack){var d=RS.byId(devId),j=d&&d.jackEls[jack];if(!j)return null;
-  var r=j.getBoundingClientRect(),c=UI.$('#content').getBoundingClientRect();
+  /* .jk is a column: the text label sits ABOVE the actual .jring hole
+     graphic, so the whole element's own center lands somewhere in the
+     label/gap area — well above the ring. Target the ring itself so a
+     cable's end renders in the middle of the hole, not floating over it. */
+  var ring=j.querySelector('.jring')||j;
+  var r=ring.getBoundingClientRect(),c=UI.$('#content').getBoundingClientRect();
   return{x:r.left+r.width/2-c.left,y:r.top+r.height/2-c.top};}
 var CABLE_COL={audio:'#e2a34f',cv:'#5fc9b8',mod:'#8ab4ff'};
 /* a jack is reachable only while the face carrying it is showing — and a
@@ -474,7 +479,12 @@ UI.mount=function(type){
     bp.appendChild(UI.el('div','bkhead','<div class="bkbrand"><b>'+spec.name+'</b><small>'+spec.sub+'</small></div>'));
     var jrow=UI.el('div','bkjacks');
     (spec.back||[]).forEach(function(g){var grp=UI.el('div','jgrp');
-      if(g.title)grp.appendChild(UI.el('div','jkt',g.title));
+      /* .jkt renders vertically (writing-mode:vertical-rl) — an unbounded
+         title turns into a very tall column that can push the jacks below
+         it out of view entirely, especially with the rack collapsed. Cap
+         it so every device's back panel stays a predictable height. */
+      if(g.title){var jt=g.title.length>20?g.title.slice(0,19)+'…':g.title;
+        var jktEl=UI.el('div','jkt',jt);jktEl.title=g.title;grp.appendChild(jktEl);}
       g.jacks.forEach(function(j){registerJack(dev,j[0],j[1],j[2],j[3],j[4],grp);});
       jrow.appendChild(grp);});
     bp.appendChild(jrow);

@@ -4,6 +4,16 @@ window.RS=window.RS||{};RS.mods=RS.mods||{};RS.mods.midi='ok';
 RS.MIDI=(function(){
 var MIDI={};
 var learnState=null;
+/* MPE — per-channel note tracking for devices that opt in via dev.mpe=true.
+   An MPE controller spreads simultaneous notes across channels 2-16 (each
+   note claims its own channel for its lifetime) so that per-channel pitch
+   bend / channel pressure that follows can be routed to just THAT note
+   instead of bending/pressing every held note at once. Backward compatible:
+   a device that never sets dev.mpe is untouched, and even an MPE device
+   still gets the old whole-device dev.bend()/dev.aftertouch() call whenever
+   no note is tracked on that channel (e.g. a non-MPE controller's mod/pitch
+   wheel, which rides on channel 1). */
+var mpeNote={};
 MIDI.learn=function(dev,id,label,w){
   MIDI.clearLearn();
   learnState={dev:dev,id:id,label:label,el:w};
@@ -87,9 +97,9 @@ MIDI.onMIDI=function(e){
     if(dev.type!=='rd'&&dev.channel==='omni'&&RS.S.focus&&RS.S.focus!==dev)return;
     if(cmd===0x90&&d2>0){flash(dev);
       if(dev.type==='rd'){var tr=dev.dmap[d1];if(tr!==undefined)dev.hit(tr,RS.A.ctx.currentTime,d2/127);}
-      else if(dev.noteOn)dev.noteOn(d1,d2/127);
+      else if(dev.noteOn){dev.noteOn(d1,d2/127);if(dev.mpe)mpeNote[dev.id+':'+midiCh]=d1;}
     }else if(cmd===0x80||(cmd===0x90&&d2===0)){
-      if(dev.type!=='rd'&&dev.noteOff)dev.noteOff(d1);
+      if(dev.type!=='rd'&&dev.noteOff){dev.noteOff(d1);if(dev.mpe)delete mpeNote[dev.id+':'+midiCh];}
     }else if(cmd===0xB0){var v=d2/127;
       if(d1===1&&dev.mod)dev.mod(v);
       else if(d1===7&&dev.P.vol)dev.P.vol.set(v*1.2);
@@ -97,10 +107,17 @@ MIDI.onMIDI=function(e){
         if(!dev.pedal){dev.sustained.forEach(function(n){dev.noteOff(n);});dev.sustained.clear();}}
       else if(d1===74&&dev.P.cut)dev.P.cut.set(30*Math.pow(16000/30,v));
     }else if(cmd===0xD0){
-      var av=Math.max(0,Math.min(1,d1/127));
-      if(dev.mod)dev.mod(av*.8);
-      if(dev.aftertouch)dev.aftertouch(av);
-    }else if(cmd===0xE0&&dev.bend)dev.bend((((d2<<7)|d1)-8192)/8192);});};
+      var mpeN1=dev.mpe?mpeNote[dev.id+':'+midiCh]:undefined;
+      if(mpeN1!==undefined&&dev.notePressure)dev.notePressure(mpeN1,Math.max(0,Math.min(1,d1/127)));
+      else{
+        var av=Math.max(0,Math.min(1,d1/127));
+        if(dev.mod)dev.mod(av*.8);
+        if(dev.aftertouch)dev.aftertouch(av);}
+    }else if(cmd===0xE0){
+      var mpeN2=dev.mpe?mpeNote[dev.id+':'+midiCh]:undefined;
+      var bendV=(((d2<<7)|d1)-8192)/8192;
+      if(mpeN2!==undefined&&dev.noteBend)dev.noteBend(mpeN2,bendV);
+      else if(dev.bend)dev.bend(bendV);}});};
 MIDI.panel=function(){
   var ins=RS.UI.$('#midiIns');
   ins.innerHTML=RS.S.midiIns.length?'':'<p>No MIDI inputs found. Connect a controller and refresh.</p>';

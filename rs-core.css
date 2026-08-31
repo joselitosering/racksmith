@@ -50,7 +50,7 @@ svg{display:block}
    chips + collapse toggle) — every .grp/panel/custom row a device appends
    after .pheader disappears, regardless of that device's own layout, since
    this only ever targets ".chassis"'s direct children */
-.dev.collapsed .face.front .chassis>*:not(.pheader){display:none}
+.dev.collapsed .face.front .chassis>*:not(.pheader){display:none!important}
 .plate{display:inline-flex;align-items:center;height:24px;padding:0 11px;border-radius:3px;font-weight:700;font-size:14px;letter-spacing:.16em;color:#f2f3f5;box-shadow:inset 0 -2px 4px rgba(0,0,0,.35),inset 0 1px 0 rgba(255,255,255,.18)}
 .plate small{font-weight:600;font-size:10px;letter-spacing:.14em;margin-left:9px;opacity:.72}
 .pheader .sp{flex:1}
@@ -131,6 +131,60 @@ canvas.vucv{width:100%;height:94px;display:block;border-radius:3px}
 /* ---- RTA display (Qu-style screen) ---- */
 .scopewrap{display:flex;flex-direction:column;gap:6px}
 canvas.scope{width:100%;height:176px;display:block;background:#05080a;border:1px solid #04060a;border-radius:4px;box-shadow:inset 0 2px 14px rgba(0,0,0,.9),0 0 0 1px rgba(120,200,150,.07);cursor:crosshair;touch-action:none}
+/* ---- AR-15 sample status line ---- */
+.ar15stat{font-size:9px;font-weight:600;letter-spacing:.08em;color:#8a8f99;text-align:center}
+.ar15stat.on{color:#e0c088}
+/* single 3-color mic peak LED: dark=silent, green=signal, yellow=hot, red=peaking */
+.ar15peakled{width:11px;height:11px;border-radius:50%;background:#241a12;border:1px solid #140d08;flex:none}
+.ar15peakled.on{background:#5fc46a;box-shadow:0 0 8px rgba(95,196,106,.7)}
+.ar15peakled.on.ar15led-y{background:#f2c94c;box-shadow:0 0 8px rgba(242,201,76,.7)}
+.ar15peakled.on.ar15led-r{background:#ff4a3a;box-shadow:0 0 8px rgba(255,74,58,.7)}
+/* ---- AR-15 theme: HELLSCAPE — charred obsidian chassis, molten-ember
+   red/orange accents, sulfur-ash text. Same layout as before, colors only. ---- */
+.dev-ar15 .face.front{background:linear-gradient(165deg,#2a0806 0%,#160302 55%,#080101 100%);border-color:#000}
+.dev-ar15 .plate{background:linear-gradient(#ff7a3a,#d21e0a 55%,#7a0d02);color:#1a0400;
+  box-shadow:inset 0 -2px 4px rgba(0,0,0,.5),inset 0 1px 0 rgba(255,180,120,.35)}
+.dev-ar15 .plate small{color:#3a0800;opacity:.85}
+.dev-ar15 .grp{background:linear-gradient(165deg,#3a0f0a 0%,#160402 100%);border:1px solid #000;
+  border-radius:14px;box-shadow:inset 0 1px 0 rgba(255,90,40,.08),0 3px 10px rgba(0,0,0,.55)}
+.dev-ar15 .grp>h5{color:#ff5a2e;letter-spacing:.18em;text-shadow:0 0 6px rgba(255,74,26,.5)}
+.dev-ar15 h5,.dev-ar15 .kl,.dev-ar15 .kl2,.dev-ar15 .vl{color:#f0d0bc}
+.dev-ar15 .kv,.dev-ar15 .vv{color:#ff8a4a}
+.dev-ar15 .kn .dial{background:radial-gradient(circle at 35% 28%,#4a1108,#1a0503 62%,#050101);border-color:#000}
+.dev-ar15 .kn svg .trk{stroke:#0a0101}
+.dev-ar15 .kn svg .ptr{stroke:#ff5228}
+.dev-ar15 .vtrack{background:#0a0101}
+.dev-ar15 .vfill{background:linear-gradient(#ff6a1a,#8a0e02 85%);opacity:.9}
+.dev-ar15 .vcap{background:linear-gradient(#ffcf8a,#ff3b1f 55%,#8a0e02);border-color:#000}
+.dev-ar15 .stpb,.dev-ar15 .qbtn{background:linear-gradient(#3a1008,#160502);border-color:#000;color:#c9714a}
+.dev-ar15 .stpb:hover{color:#ffb88a}
+.dev-ar15 .stpb.on{background:linear-gradient(#ff5228,#a80e02);color:#1a0400}
+.dev-ar15 .stpb.on i{background:#ffe0c0;box-shadow:0 0 4px rgba(255,140,60,.8)}
+.dev-ar15 .selbox{background:#140302;color:#f0d0bc;border-color:#000}
+.dev-ar15 .mchip{background:#140302;border-color:#000;color:#c9714a}
+.dev-ar15 .mchip.on i,.dev-ar15 .mchip.lit i{background:#ff5228;box-shadow:0 0 6px rgba(255,74,26,.8)}
+.dev-ar15 .plcd{background:#0a0101;border-color:#000}
+.dev-ar15 .plcd .pname{color:#ff5228}
+.dev-ar15 canvas.scope{background:#0a0201;border-color:#000;
+  box-shadow:inset 0 2px 14px rgba(0,0,0,.95),0 0 0 1px rgba(255,59,31,.15)}
+.dev-ar15 canvas.scope.dragover{box-shadow:inset 0 2px 14px rgba(0,0,0,.95),0 0 0 2px #ff3b1f}
+.dev-ar15 .content-note2{border-left-color:#c81e0a;background:#140302;color:#c9714a}
+.dev-ar15 .ftrack{background:#0a0101}
+.dev-ar15 .fhandle{background:linear-gradient(#ffcf9a,#c9714a 45%,#4a1a0a)}
+/* sample slot pill (SAMPLE SLOT A/B in the reference) */
+.ar15pillrow{display:flex;gap:8px}
+.ar15pill{flex:1;display:flex;align-items:center;gap:10px;padding:8px 14px;border-radius:10px;
+  background:linear-gradient(#1c0805,#0a0201);border:1px solid #000;color:#8a4a30;
+  font-size:10px;font-weight:600;letter-spacing:.1em}
+.ar15pill b{font-weight:800;letter-spacing:.16em;color:inherit}
+.ar15pill.on{background:linear-gradient(#ff9a5a,#d21e0a);color:#1a0400;border-color:#7a0d02}
+/* transport / mode icon buttons (LOAD, REC, REVERSE, LOOP, GRAIN, DETECT,
+   A/B, note-quantize, save) */
+.ar15icon{min-width:38px;height:26px;padding:0 8px;border-radius:8px;
+  background:linear-gradient(#3a1008,#160502);border:1px solid #000;color:#c9714a;
+  font-size:9px;font-weight:700;letter-spacing:.04em;cursor:pointer;box-shadow:inset 0 1px 0 rgba(255,90,40,.08)}
+.ar15icon:hover{color:#ffb88a}
+.ar15icon.on{background:linear-gradient(#ff5228,#a80e02);color:#1a0400;border-color:#7a0d02}
 .srcbar{display:flex;gap:4px;flex-wrap:wrap}
 .srcbtn{min-width:46px;height:18px;padding:0 6px;border-radius:3px;font-size:8px;font-weight:700;letter-spacing:.08em;color:#6f747e;background:linear-gradient(#2b2e34,#1e2025);border:1px solid #0d0e11}
 .srcbtn:hover{color:#c9cdd4}

@@ -760,9 +760,9 @@ build:function(dev){
 },
 back:[
   {title:'CHANNEL IN 1-8',jacks:[1,2,3,4,5,6,7,8].map(function(n){return['ch'+n,'in','audio',null,'CH'+n];})},
-  {title:'AUX SEND',jacks:[1,2,3,4].map(function(n){return['aux'+n,'out','audio',null,'AUX'+n];})},
   {title:'AUX RETURN',jacks:[1,2,3,4].map(function(n){return['ret'+n,'in','audio',null,'RET'+n];})},
-  {title:'DIRECT BUS',jacks:[['in','in','audio',null,'BUS IN']]}]});
+  {title:'DIRECT BUS',jacks:[['in','in','audio',null,'BUS IN']]},
+  {title:'AUX SEND',jacks:[1,2,3,4].map(function(n){return['aux'+n,'out','audio',null,'AUX'+n];})}]});
 
 /* ============ IN-2 live input — mic / line / interface ============ */
 /* IN-2 — modern digital line input: a dark LED-segment spectrum analyzer
@@ -1112,7 +1112,7 @@ build:function(dev){
 back:[
   {title:'CHANNEL IN 1-8',jacks:[1,2,3,4,5,6,7,8].map(function(n){return['ch'+n,'in','audio',null,'CH'+n];})},
   {title:'CHAIN IN',jacks:[['chainin','in','audio',null,'CHAIN IN']]},
-  {title:'MASTER BUS OUT',jacks:[['out','out','audio',null,'OUT']]}]});
+  {title:'MASTER OUT',jacks:[['out','out','audio',null,'OUT']]}]});
 /* channel strip — the exact same layout as HW-1's own chStrip: a qbtnrow
    (MUTE/PFL, styled the same as HW-1's quick buttons — SEL is dropped since
    TRK-8 has no RTA scope for it to select into) above the name, GAIN/HPF/
@@ -1858,10 +1858,10 @@ build:function(dev){
   setAlgo(1);setFold(0);svfBlend(0);applyVoiceMode();
 },
 back:[
-  {title:'AUDIO OUT A',jacks:[['outa','out','audio',null,'OUT A · POST-FX']]},
-  {title:'AUDIO OUT B',jacks:[['outb','out','audio',null,'OUT B · PRE-FX']]},
   {title:'EXT IN',jacks:[['extIn','in','audio',null,'EXT · TO FOLDER']]},
-  {title:'CV / GATE IN',jacks:[['cvin','in','cv',null,'CV IN'],['gatein','in','cv',null,'GATE IN']]}]});
+  {title:'CV / GATE IN',jacks:[['cvin','in','cv',null,'CV IN'],['gatein','in','cv',null,'GATE IN']]},
+  {title:'AUDIO OUT A',jacks:[['outa','out','audio',null,'OUT A · POST-FX']]},
+  {title:'AUDIO OUT B',jacks:[['outb','out','audio',null,'OUT B · PRE-FX']]}]});
 
 /* ---- NRD-2 sound bank ---- */
 var PRESETS_NRD=(function(){
@@ -2708,8 +2708,8 @@ build:function(dev){
     A.smooth(dev.driftSrc.offset,dev.p.drift,.05);},_def:.25};
   setShape(dev.lfo1,0);setShape(dev.lfo2,1);
 },
-back:[{title:'AUDIO OUT',jacks:[['outa','out','audio',null,'OUT']]},
-  {title:'CV / GATE / ENV IN',jacks:[['cvin','in','cv',null,'CV IN'],['gatein','in','cv',null,'GATE IN'],['envin','in','cv',null,'ENV IN']]}]});
+back:[{title:'CV / GATE / ENV',jacks:[['cvin','in','cv',null,'CV IN'],['gatein','in','cv',null,'GATE IN'],['envin','in','cv',null,'ENV IN']]},
+  {title:'AUDIO OUT',jacks:[['outa','out','audio',null,'OUT']]}]});
 
 /* ============ RD-8 (unchanged) ============ */
 RS.dev('rd',{name:'RD-8',sub:'RHYTHM COMPOSER · 808',accent:'#f2a33c',channel:'omni',
@@ -2808,11 +2808,15 @@ build:function(dev){
   dev.muted=new Array(NTRK).fill(false);
   dev.dmap={};
   function dm(tr,notes){notes.forEach(function(n){dev.dmap[n]=tr;});}
-  dm(0,[35,36]);dm(1,[38,40]);dm(2,[39]);dm(3,[41,45]);
-  dm(4,[50]);dm(5,[42,44]);dm(6,[46,55]);dm(7,[63,69]);
-  dm(8,[33,34,43,58]);
-  dm(9,[]);dm(10,[]);dm(11,[47,48]);dm(12,[49,52,57]);dm(13,[51,53,59]);dm(14,[75]);
-  dm(15,[62]);
+  /* note numbers follow PADORDER's 4x4 grid position, not GM drum notes —
+     1-4 top row, 5-8 second row, 9-12 third row, 13-16 bottom row — so a
+     MIDI pad controller wired 1..16 in reading order lines up with what's
+     shown on screen. Sound-to-pad placement (PADORDER) is unchanged. */
+  dm(0,[1]);dm(1,[3]);dm(2,[13]);dm(3,[7]);
+  dm(4,[5]);dm(5,[9]);dm(6,[10]);dm(7,[16]);
+  dm(8,[2]);
+  dm(9,[4]);dm(10,[8]);dm(11,[6]);dm(12,[11]);dm(13,[12]);dm(14,[14]);
+  dm(15,[15]);
   function reshape(){
     var res=dev.p.res||16,bars=dev.p.bars||1,need=bars*res;
     while(dev.pat.length<8)dev.pat.push([]);
@@ -3233,9 +3237,9 @@ build:function(dev){
         fl.style.transition='opacity .22s ease-out';
         fl.style.opacity='0';});}};
 },
-back:[{title:'AUDIO OUT',jacks:[['outa','out','audio',null,'OUT']]},
-  {title:'DIRECT OUTS · PER INSTRUMENT (DRY, PRE-FX)',jacks:DRLAB.map(function(d,i){return['do'+i,'out','audio',null,d[0]];})},
-  {title:'GATE / ENV IN',jacks:[['gatein','in','cv',null,'GATE IN'],['envin','in','cv',null,'ENV IN · VELOCITY']]}]});
+back:[{title:'GATE / ENV IN',jacks:[['gatein','in','cv',null,'GATE IN'],['envin','in','cv',null,'ENV IN · VELOCITY']]},
+  {title:'AUDIO OUT',jacks:[['outa','out','audio',null,'OUT']]},
+  {title:'DIRECT OUTS',jacks:DRLAB.map(function(d,i){return['do'+i,'out','audio',null,d[0]];})}]});
 
 /* ============ MTRX-16 ============ */
 RS.dev('mx',{name:'MTRX-16',sub:'STEP SEQUENCER · CV / GATE',accent:'#5fc9b8',
